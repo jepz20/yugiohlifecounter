@@ -1,0 +1,386 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity$PlaceholderFragment"
+    android:id="@+id/principio"    >
+
+    <TextView android:text="@string/contador1_texto"
+        android:layout_width="150dp"
+        android:layout_height="90dp"
+        android:id="@+id/contador1"
+        android:gravity="center"
+        android:textIsSelectable="false"
+        android:background="@drawable/gradient_100"
+        android:textSize="50sp"
+        android:layout_alignBottom="@+id/contador2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <TextView
+        android:text="@string/contador2_texto"
+        android:layout_width="150dp"
+        android:layout_height="90dp"
+        android:id="@+id/contador2"
+        android:textIsSelectable="false"
+        android:gravity="center"
+        android:background="@drawable/gradient_100"
+        android:textSize="50sp"
+        android:height="400dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/suma2"
+        android:layout_alignEnd="@+id/suma2"
+        android:layout_marginTop="31dp" />
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="+"
+        android:id="@+id/suma1"
+        android:layout_below="@+id/contador1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="150dp" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="-"
+        android:id="@+id/resta1"
+        android:layout_below="@+id/suma1"
+        android:layout_alignParentLeft="true" />
+
+    <TextView
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="textEnd"
+        android:id="@+id/valor_operado"
+        android:layout_above="@+id/btnUno"
+        android:layout_centerHorizontal="true"
+        android:background="@color/primary_material_light"
+        android:gravity="right"
+        android:textSize="25dp" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="&lt;-"
+        android:id="@+id/undo"
+        android:layout_below="@+id/suma1"
+        android:layout_toLeftOf="@+id/suma2"
+        android:layout_toStartOf="@+id/suma2" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="->"
+        android:id="@+id/redo"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/undo"
+        android:layout_alignStart="@+id/undo" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="+"
+        android:id="@+id/suma2"
+        android:layout_alignTop="@+id/valor_operado"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="-"
+        android:id="@+id/resta2"
+        android:layout_below="@+id/suma2"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:text="Turno"
+        android:id="@+id/turno"
+        android:layout_above="@+id/valor_operado"
+        android:layout_alignLeft="@+id/btnUno" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:text="@string/boton_reiniciar"
+        android:id="@+id/btnReiniciar"
+        android:layout_above="@+id/valor_operado"
+        android:layout_alignRight="@+id/btnTres" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="1"
+        android:id="@+id/btnUno"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/suma1"
+        android:layout_alignLeft="@+id/valor_operado"
+        android:layout_alignStart="@+id/valor_operado" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="2"
+        android:id="@+id/btnDos"
+        android:background="#B4CDCD"
+        android:layout_alignTop="@+id/btnUno"
+        android:layout_toRightOf="@+id/btnUno"
+        android:layout_toEndOf="@+id/btnUno" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="3"
+        android:id="@+id/btnTres"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/valor_operado"
+        android:layout_toRightOf="@+id/btnDos"
+        android:layout_toEndOf="@+id/btnDos" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="4"
+        android:background="#B4CDCD"
+        android:id="@+id/btnCuatro"
+        android:layout_alignTop="@+id/btnCinco"
+        android:layout_toLeftOf="@+id/btnCinco"
+        android:layout_toStartOf="@+id/btnCinco" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="5"
+        android:id="@+id/btnCinco"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/btnDos"
+        android:layout_toLeftOf="@+id/btnTres"
+        android:layout_toStartOf="@+id/btnTres" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="6"
+        android:id="@+id/btnSeis"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/btnDos"
+        android:layout_toRightOf="@+id/btnDos"
+        android:layout_toEndOf="@+id/btnDos" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="7"
+        android:id="@+id/btnSiete"
+        android:background="#B4CDCD"
+        android:layout_above="@+id/btnDobleCero"
+        android:layout_alignLeft="@+id/btnCuatro"
+        android:layout_alignStart="@+id/btnCuatro" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="9"
+        android:id="@+id/btnNueve"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/btnSeis"
+        android:layout_alignLeft="@+id/btnSeis"
+        android:layout_alignStart="@+id/btnSeis" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="0"
+        android:id="@+id/btnCero"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/btnSiete"
+        android:layout_alignLeft="@+id/btnSiete"
+        android:layout_alignStart="@+id/btnSiete" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="00"
+        android:id="@+id/btnDobleCero"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/btnNueve"
+        android:layout_toRightOf="@+id/btnSiete"
+        android:layout_toEndOf="@+id/btnSiete" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="8"
+        android:id="@+id/btnOcho"
+        android:background="#B4CDCD"
+        android:layout_below="@+id/btnCinco"
+        android:layout_toLeftOf="@+id/btnSeis"
+        android:layout_toStartOf="@+id/btnSeis" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="C"
+        android:id="@+id/btnBorrar"
+        android:layout_below="@+id/btnCero"
+        android:layout_alignLeft="@+id/btnCero"
+        android:layout_alignStart="@+id/btnCero" />
+    <Button
+        android:layout_width="75dp"
+        android:layout_height="50dp"
+        android:text="@string/boton_fin_simulacion"
+        android:id="@+id/btnFinSimulacion"
+        android:textSize="12sp"
+        android:layout_alignTop="@+id/btnSimulacion"
+        android:layout_toLeftOf="@+id/btnReiniciar"
+        android:layout_toStartOf="@+id/btnReiniciar" />
+    <Button
+        android:layout_width="75dp"
+        android:layout_height="50dp"
+        android:textSize="12sp"
+        android:text="@string/boton_aplica_simulacion"
+        android:id="@+id/btnAplicaSimulacion"
+        android:layout_alignTop="@+id/btnFinSimulacion"
+        android:layout_alignRight="@+id/btnSimulacion"
+        android:layout_alignEnd="@+id/btnSimulacion" />
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="@string/boton_simulacion"
+        android:id="@+id/btnSimulacion"
+        android:textSize="12sp"
+        android:layout_below="@+id/btnBorrar"
+        android:layout_alignLeft="@+id/btnBorrar"
+        android:layout_alignStart="@+id/btnCero" />
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="000"
+        android:id="@+id/btnTripleCero"
+        android:background="#B4CDCD"
+        android:layout_above="@+id/btnBorrar"
+        android:layout_toRightOf="@+id/btnDobleCero"
+        android:layout_toEndOf="@+id/btnDobleCero" />
+
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:id="@+id/temporizador"
+        android:background="@color/rojo"
+        android:text="45:00"
+        android:layout_below="@+id/resta2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/btnCuatro"
+        android:layout_toStartOf="@+id/btnCuatro" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivJ1J1"
+        android:layout_alignLeft="@+id/contador1"
+        android:src="@drawable/circulo_gris"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/contador1"
+        android:layout_alignRight="@+id/suma1"
+        android:layout_alignEnd="@+id/suma1" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivJ1J2"
+        android:src="@drawable/circulo_gris"
+        android:layout_above="@+id/contador1"
+        android:layout_toRightOf="@+id/ivJ1J1"
+        android:layout_alignTop="@+id/ivJ1J1"
+        android:layout_alignRight="@+id/temporizador"
+        android:layout_alignEnd="@+id/temporizador" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivJ1J3"
+        android:src="@drawable/circulo_gris"
+        android:layout_alignTop="@+id/ivJ1J2"
+        android:layout_toRightOf="@+id/temporizador"
+        android:layout_above="@+id/contador1"
+        android:layout_toLeftOf="@+id/btnDos"
+        android:layout_toStartOf="@+id/btnDos" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivJ2J1"
+        android:src="@drawable/circulo_gris"
+        android:layout_above="@+id/contador1"
+        android:layout_alignTop="@+id/ivJ1J3"
+        android:layout_alignLeft="@+id/contador2"
+        android:layout_alignStart="@+id/contador2"
+        android:layout_alignRight="@+id/btnReiniciar"
+        android:layout_alignEnd="@+id/btnReiniciar" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivJ2J2"
+        android:src="@drawable/circulo_gris"
+        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/ivJ2J3"
+        android:layout_toLeftOf="@+id/ivJ2J3"
+        android:layout_toRightOf="@+id/ivJ2J1"
+        android:layout_toEndOf="@+id/ivJ2J1" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivJ2J3"
+        android:src="@drawable/circulo_rojo"
+        android:layout_alignTop="@+id/ivJ2J1"
+        android:layout_alignRight="@+id/contador2"
+        android:layout_alignEnd="@+id/contador2"
+        android:layout_alignBottom="@+id/ivJ2J1"
+        android:layout_alignLeft="@+id/suma2"
+        android:layout_alignStart="@+id/suma2" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Moneda"
+        android:id="@+id/lanzar_moneda"
+        android:layout_alignTop="@+id/btnNueve"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+    <RelativeLayout
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:id="@+id/loMoneda">
+
+        <ImageView
+            android:src="@drawable/cara"
+            android:id="@+id/ivCara"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="64dp" />
+
+        <ImageView
+            android:id="@+id/ivCruz"
+            android:src="@drawable/cruz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="64dp" />
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Yugioh Life Counter</string>
+    <string name="contador1_texto">8000</string>
+    <string name="contador2_texto">8000</string>
+    <string name="action_settings">Settings</string>
+    <string name="boton_turno">T</string>
+    <string name="boton_reiniciar">Ren</string>
+    <string name="boton_simulacion">Simular</string>
+    <string name="boton_fin_simulacion">Fin</string>
+    <string name="boton_aplica_simulacion">Aplicar</string>
+</resources>

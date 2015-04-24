@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="verde_inicio">#226f45</color>
+    <color name="rojo">#9a0707</color>
+    <color name="verde_centro">#226f45</color>
+    <color name="rojo_centro">#9a0707</color>
+    <color name="simulacion">#00B2EE</color>
+    <color name="fondo">#fff</color>
+</resources>
