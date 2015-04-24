@@ -1,7 +1,7 @@
 package hn.jepz.www.yugiohlifecounter;
 
 /**
- * Created by jepz2_000 on 4/23/2015.
+ * Created by Jose Eduardo Perdomo on 4/23/2015.
  */
 
 import android.animation.ValueAnimator;
@@ -35,8 +35,8 @@ import java.util.Date;
  * A Fragmento donde esta la partida.
  */
 public class PartidaFragment extends Fragment {
-    private int posicionArrayActual, turno, nuevoTexto,cantidadJugadores, jugadorActual, contador1Simulacion;
-    private int contador2Simulacion, estadoTempo, valorTempo, tempoInicial, numeroJuego, valorInicial, totalJuegos;
+    private int posicionArrayActual, turno, nuevoTexto,cantidadJugadores, jugadorActual, contador1Simulacion,
+            contador2Simulacion, estadoTempo, valorTempo, tempoInicial, numeroJuego, valorInicial, totalJuegos;
     private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador ;
     private boolean simulando;
     private Button btnTurno, btnReiniciar, btnSimulacion, btnFinSimulacion, btnAplicaSimulacion,
@@ -46,7 +46,6 @@ public class PartidaFragment extends Fragment {
     private String str,ganadorJuego, ganadorDuelo ;
     private CountDownTimer cdtTempo;
     private ImageView ivJ1J1,ivJ1J2,ivJ1J3,ivJ2J1,ivJ2J2,ivJ2J3;
-
 
     public PartidaFragment() {
     }
