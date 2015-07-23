@@ -6,4 +6,5 @@
     <color name="rojo_centro">#9a0707</color>
     <color name="simulacion">#00B2EE</color>
     <color name="fondo">#fff</color>
+    <color name="transparent">#80000000</color>
 </resources>

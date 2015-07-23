@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Yugioh Life Counter</string>
+    <string name="app_name">YLC</string>
     <string name="contador1_texto">8000</string>
     <string name="contador2_texto">8000</string>
     <string name="action_settings">Settings</string>
+    <string name="action_undo">Deshacer</string>
+    <string name="action_moneda">Moneda</string>
+    <string name="action_dado">Dado</string>
+    <string name="action_reiniciar">Reiniciar</string>
+    <string name="action_log">Historial</string>
+    <string name="action_redo">Rehacer</string>
     <string name="boton_turno">T</string>
-    <string name="boton_reiniciar">Ren</string>
+    <string name="boton_reiniciar">R</string>
     <string name="boton_simulacion">Simular</string>
     <string name="boton_fin_simulacion">Fin</string>
     <string name="boton_aplica_simulacion">Aplicar</string>
+    <string name="dialogo_titulo_fin_juego">Gano el Jugador </string>
+    <string name="dialogo_texto_fin_juego">Deseas Iniciar el Juego No.</string>
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_moneda">MonedaActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_dado">DadoActivity</string>
+    <string name="title_activity_log">Historial</string>
 </resources>

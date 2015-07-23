@@ -2,6 +2,7 @@ package hn.jepz.www.yugiohlifecounter;
 
 import android.graphics.Camera;
 import android.graphics.Matrix;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
@@ -91,7 +92,8 @@ public class FlipAnimator extends Animation {
 
         camera.save();
         camera.translate(0.0f, 0.0f, (float) (150.0 * Math.sin(radians)));
-        camera.rotateY(degrees);
+        Log.v("FlipAnimator", "Eje X");
+        camera.rotateX(degrees);
         camera.getMatrix(matrix);
         camera.restore();
 
