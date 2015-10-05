@@ -18,7 +18,7 @@ public class Flip3dAnimation extends Animation {
         mToDegrees = toDegrees;
         mCenterX = centerX;
         mCenterY = centerY;
-        mDirection = direction;
+    mDirection = direction;
     }
 
     @Override

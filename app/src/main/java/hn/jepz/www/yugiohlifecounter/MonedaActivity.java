@@ -1,7 +1,6 @@
 package hn.jepz.www.yugiohlifecounter;
 
 import android.app.Activity;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -12,11 +11,10 @@ import android.widget.ImageView;
 import java.util.Random;
 
 public class MonedaActivity extends Activity {
-    AnimationDrawable animacionMoneda;
+
     private ImageView imCara;
     private ImageView imCruz;
     private boolean mPrimeraImagen = true;
-    private boolean termino = false;
     private int mContador, mVeces,mDuracion;
 
     private void aplicarRotacion (float inicio, float fin) {

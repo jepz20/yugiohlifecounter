@@ -2,16 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_undo" android:title="@string/action_undo"
+        android:icon="@drawable/ic_undo"
         android:orderInCategory="100" app:showAsAction="always" />
     <item android:id="@+id/action_redo" android:title="@string/action_redo"
+        android:icon="@drawable/ic_redo"
         android:orderInCategory="110" app:showAsAction="always" />
-    <item android:id="@+id/action_moneda" android:title="@string/action_moneda"
-        android:orderInCategory="140" app:showAsAction="always" />
-    <item android:id="@+id/action_dado" android:title="@string/action_dado"
-        android:orderInCategory="150" app:showAsAction="always" />
-    <item android:id="@+id/action_log" android:title="@string/action_log"
-        android:orderInCategory="130" app:showAsAction="always" />
     <item android:id="@+id/action_reiniciar" android:title="@string/action_reiniciar"
-        android:orderInCategory="120" app:showAsAction="always"
-        />
+        android:icon="@drawable/ic_reiniciar"
+        android:orderInCategory="120" app:showAsAction="always"/>
+    <!--<item android:id="@+id/action_dado" android:title="@string/action_dado"-->
+        <!--android:icon="@drawable/ic_dado"-->
+        <!--android:orderInCategory="130" app:showAsAction="ifRoom" />-->
+    <!--<item android:id="@+id/action_moneda" android:title="@string/action_moneda"-->
+        <!--android:icon="@drawable/ic_moneda"-->
+        <!--android:orderInCategory="140" app:showAsAction="ifRoom" />-->
+    <!--<item android:id="@+id/action_log" android:title="@string/action_log"-->
+        <!--android:icon="@drawable/ic_log"-->
+        <!--android:orderInCategory="150" app:showAsAction="ifRoom" />-->
 </menu>

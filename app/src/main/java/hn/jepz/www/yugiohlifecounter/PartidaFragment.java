@@ -12,10 +12,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.SpannableString;
+import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +32,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +39,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A Fragmento donde esta la partida.
@@ -45,50 +49,54 @@ public class PartidaFragment extends Fragment {
             contador2Simulacion,contador1,contador2, valorTempo, tempoInicial, numeroJuego, valorInicial, totalJuegos;
     private int ladoNumeros; //0 ningun lado, 1 jugador1, 2 jugador2 etc..
     private int estadoTempo; //-1 sin iniciar, 0 detenido, 1 contando
-    private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador, tvEspaciadoDerecho, tvEspaciadoIzquierdo;
+    private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador;
+    private TextView tvTurno,tvEspaciadoDerecho, tvEspaciadoIzquierdo, tvLog1, tvLog2;
+    private TextView tvDado, tvMoneda,tvLog;
     private boolean simulando, borro;
-    private boolean mostrarDialog = true;
-    private Button btnTurno, btnSimulacion, btnFinSimulacion, btnAplicaSimulacion;
+    private boolean mostrarDialogGanador = true;
+    private boolean mostrarDialogReinicio = false;
+    private Button  btnSimulacion, btnFinSimulacion, btnAplicaSimulacion, btnRetirada;
     private JSONArray datosPartida, partidaSimulacion, partida;
     private JSONObject duelo;
-    private String str,ganadorJuego, ganadorDuelo ;
     private ImageView ivJ1J1,ivJ1J2,ivJ1J3,ivJ2J1,ivJ2J2,ivJ2J3;
-    private LinearLayout contenedorGanados1, contenedorGanados2,contenedorNumeros, contenedorJugador1, contenedorJugador2;
+    private String str,ganadorJuego, ganadorDuelo ;
+    private LinearLayout contenedorGanados1, contenedorGanados2,contenedorNumeros,
+            contenedorJugador1, contenedorJugador2;
     private Handler mHandler = new Handler();
     Thread threadContenedorNumeros;
-    private BroadcastReceiver contadorReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            actualizaValorTempo(intent);
-        }
-    };
+    private BroadcastReceiver contadorReceiver;
 
     public PartidaFragment() {
     }
 
-    public void manejarTemporizar () {
+    public void     manejarTemporizar () {
         //Si esta contando cancelarlo
         if (estadoTempo == 1) {
             try {
                 getActivity().unregisterReceiver(contadorReceiver);
                 getActivity().stopService(new Intent(getActivity(), BroadcastCountDownService.class));
             } catch (Exception e) {
+                e.printStackTrace();
             }
             estadoTempo = 0;
             int tempo;
             if (valorTempo <= 1) {
                 tempo = tempoInicial;
             } else {
-                tempo = valorTempo * 1000;
+                tempo = valorTempo;
+            }
+            if (valorTempo != tempoInicial) {
+                tvTemporizador.setBackgroundColor(getResources().getColor(R.color.simulacion));
             }
             valorTempo =  tempo ;
-            tvTemporizador.setBackgroundColor(getResources().getColor(R.color.simulacion));
         }
         //si esta detenido o nunca fue iniciado, iniciar o continuar en lo que estaba
         else if (estadoTempo < 1){
+
             definirTemporizador();
             Intent iniciarServicio = new Intent(getActivity(), BroadcastCountDownService.class);
-            iniciarServicio.putExtra("valorTempo", valorTempo);
+            Log.v("MT-1ValorTemppo", "" + valorTempo);
+            iniciarServicio.putExtra("valorTempo", valorTempo*1000);
             getActivity().startService(iniciarServicio);
             getActivity().registerReceiver(contadorReceiver, new IntentFilter(BroadcastCountDownService.COUNTDOWN_BR));
             estadoTempo = 1;
@@ -157,50 +165,50 @@ public class PartidaFragment extends Fragment {
         }
     }
 
-    private void simular(View rootView, int accion) {
-        RelativeLayout principio = (RelativeLayout) rootView.findViewById(R.id.principio);
-        // 0 = empieza simulacion, 1 = finalizar simulacion, 2 = aplicar simulacion
-        if (accion == 0) {
-            simulando = true;
-            principio.setBackgroundColor(getResources().getColor(R.color.simulacion));
-            try {
-                partidaSimulacion = new JSONArray(datosPartida.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            contador1Simulacion = Integer.parseInt(tvContador1.getText().toString());
-            contador2Simulacion = Integer.parseInt(tvContador2.getText().toString());
-            btnSimulacion.setVisibility(View.INVISIBLE);
-            btnFinSimulacion.setVisibility(View.VISIBLE);
-            btnAplicaSimulacion.setVisibility(View.VISIBLE);
-
-        } else if (accion == 1) {
-            //TODO mejorar botones de undo y redo
-            simulando = false;
-            principio.setBackgroundColor(getResources().getColor(R.color.fondo));
-            btnSimulacion.setVisibility(View.VISIBLE);
-            try {
-                datosPartida = new JSONArray(partidaSimulacion.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            posicionArrayActual = datosPartida.length();
-            tvContador1.setText(Integer.toString(contador1Simulacion));
-            tvContador2.setText(Integer.toString(contador2Simulacion));
-            btnFinSimulacion.setVisibility(View.INVISIBLE);
-            btnAplicaSimulacion.setVisibility(View.INVISIBLE);
-            modificaFondo(contador1Simulacion, tvContador1);
-            modificaFondo(contador2Simulacion, tvContador2);
-        } else {
-            simulando = false;
-            principio.setBackgroundColor(getResources().getColor(R.color.fondo));
-            Toast.makeText(getActivity(), "Se aplico la simulacion", Toast.LENGTH_SHORT).show();
-            btnSimulacion.setVisibility(View.VISIBLE);
-            btnFinSimulacion.setVisibility(View.INVISIBLE);
-            btnAplicaSimulacion.setVisibility(View.INVISIBLE);
-        }
-
-    }
+//    private void simular(View rootView, int accion) {
+//        RelativeLayout principio = (RelativeLayout) rootView.findViewById(R.id.principio);
+//        // 0 = empieza simulacion, 1 = finalizar simulacion, 2 = aplicar simulacion
+//        if (accion == 0) {
+//            simulando = true;
+//            principio.setBackgroundColor(getResources().getColor(R.color.simulacion));
+//            try {
+//                partidaSimulacion = new JSONArray(datosPartida.toString());
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            contador1Simulacion = Integer.parseInt(tvContador1.getText().toString());
+//            contador2Simulacion = Integer.parseInt(tvContador2.getText().toString());
+//            btnSimulacion.setVisibility(View.INVISIBLE);
+//            btnFinSimulacion.setVisibility(View.VISIBLE);
+//            btnAplicaSimulacion.setVisibility(View.VISIBLE);
+//
+//        } else if (accion == 1) {
+//            //TODO mejorar botones de undo y redo
+//            simulando = false;
+//            principio.setBackgroundColor(getResources().getColor(R.color.fondo));
+//            btnSimulacion.setVisibility(View.VISIBLE);
+//            try {
+//                datosPartida = new JSONArray(partidaSimulacion.toString());
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            posicionArrayActual = datosPartida.length();
+//            tvContador1.setText(Integer.toString(contador1Simulacion));
+//            tvContador2.setText(Integer.toString(contador2Simulacion));
+//            btnFinSimulacion.setVisibility(View.INVISIBLE);
+//            btnAplicaSimulacion.setVisibility(View.INVISIBLE);
+//            modificaFondo(contador1Simulacion, tvContador1);
+//            modificaFondo(contador2Simulacion, tvContador2);
+//        } else {
+//            simulando = false;
+//            principio.setBackgroundColor(getResources().getColor(R.color.fondo));
+//            Toast.makeText(getActivity(), "Se aplico la simulacion", Toast.LENGTH_SHORT).show();
+//            btnSimulacion.setVisibility(View.VISIBLE);
+//            btnFinSimulacion.setVisibility(View.INVISIBLE);
+//            btnAplicaSimulacion.setVisibility(View.INVISIBLE);
+//        }
+//
+//    }
 
     private void verificaNuevoJuego (boolean savedInstance ) {
         if (numeroJuego >1 && savedInstance) {
@@ -225,6 +233,7 @@ public class PartidaFragment extends Fragment {
             numeroJuego = numeroJuegoAnt;
             ganadorJuego = ganadorJuegoAnt;
         }
+
         if (!ganadorJuego.equals("0") && !simulando) {
             modificaIdentificadorGanados();
             for (int y = 1; y <= cantidadJugadores; y++) {
@@ -258,17 +267,17 @@ public class PartidaFragment extends Fragment {
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
-                                mostrarDialog = false;
+                                mostrarDialogGanador = false;
                                 break;
                         }
                     }
                 };
-                if (mostrarDialog) {
+                if (mostrarDialogGanador) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getString(R.string.dialogo_texto_fin_juego) + " " + (numeroJuego+1) + "?")
                             .setTitle(getString(R.string.dialogo_titulo_fin_juego) + ganadorJuego + "!!! ")
-                            .setPositiveButton("Si", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener)
+                            .setPositiveButton(R.string.boton_positivo_fin_juego, dialogClickListener)
+                            .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
                             .show();
                 }
             } else {
@@ -281,15 +290,16 @@ public class PartidaFragment extends Fragment {
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
-                                mostrarDialog = false;
+                                mostrarDialogGanador = false;
                                 break;
                         }
                     }
                 };
-                if (mostrarDialog) {
+                if (mostrarDialogGanador) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("EL GANADOR DEL DUELO ES EL JUGADOR " + ganadorDuelo+ "!!! \n Deseas Iniciar un nuevo Duelo?").setPositiveButton("Si", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
+                    builder.setMessage(getString(R.string.dialogo_texto_fin_partida_p1) + " " + ganadorDuelo+ getString(R.string.dialogo_texto_fin_partida_p2))
+                            .setPositiveButton("Si", dialogClickListener)
+                            .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener).show();
                 }
             }
         }
@@ -347,30 +357,64 @@ public class PartidaFragment extends Fragment {
         contador2 = valorInicial;
         turno = 1;
         ganadorJuego = "0";
+        mostrarDialogGanador = true;
+        mostrarDialogReinicio = false;
         tvContador1.setText(Integer.toString(contador1));
         tvContador1.setBackgroundResource(R.drawable.gradient_100);
         tvContador2.setText(Integer.toString(contador2));
         tvContador2.setBackgroundResource(R.drawable.gradient_100);
         tvValorAOperar.setText("0");
+        contenedorNumeros.setVisibility(View.GONE);
+        if (threadContenedorNumeros.isAlive()) {
+            threadContenedorNumeros.interrupt();
+        }
+        tvLog1.setText(".\n.\n.");
+        tvLog2.setText(".\n.\n.");
+        turno=1;
+        tvTurno.setText("T:1");
+        if (numeroJuego == 1) {
+            reiniciarTemporizador();
+//            duelo = new JSONObject();
+        }
+        try {
+            JSONArray tempPartida = new JSONArray();
+            JSONObject partidaJSON = new JSONObject();
+            partidaJSON.put("numeroJuego", Integer.toString(numeroJuego));
+            partidaJSON.put("ganador", ganadorJuego );
+            partidaJSON.put("datosPartida", datosPartida);
+            for (int r = 0; r < numeroJuego -1; r++)  {
+                tempPartida.put(partida.get(r));
+            }
+            partida = tempPartida;
+            partida.put(partidaJSON);
+
+            duelo.put("partida",partida);
+            duelo.put("ganador", ganadorDuelo);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private  void reiniciarPartida () {
-        valorInicial = 8000;
-        cantidadJugadores = 2;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        valorInicial = Integer.parseInt(prefs.getString(getString(R.string.pref_key_valor_inicial),getString(R.string.pref_default_valor_inicial)));
+        tempoInicial = Integer.parseInt(prefs.getString(getString(R.string.pref_key_tiempo_contador),getString(R.string.pref_default_tiempo_contador)));
+        tempoInicial = tempoInicial*60;
         totalJuegos = 3;
+        tvLog1.setText(".\n.\n.");
+        tvLog2.setText(".\n.\n.");
+        cantidadJugadores = 2;
         ganadorJuego = "0";
         ganadorDuelo = "0";
-        tempoInicial = 2400000;
         duelo = new JSONObject();
-        turno=1;
         borro = true;
         ladoNumeros = 0;
-        btnTurno.setText("T:1");
         partida = new JSONArray();
         JSONObject partidaJson  = new JSONObject();
         try {
-
-            //TODO quitar valos estaticos
                 /*pongos los datos de la partida en un json */
             partidaJson.put("numeroJuego", Integer.toString(numeroJuego));
             partidaJson.put("ganador", ganadorJuego );
@@ -388,11 +432,9 @@ public class PartidaFragment extends Fragment {
         }
         nuevoTexto = 0; //0 es que hay nuevo texto; 1 ya existe el texto
         simulando = false;
-        reiniciarTemporizador();
-        btnSimulacion.setVisibility(View.VISIBLE);
-        btnFinSimulacion.setVisibility(View.INVISIBLE);
-        btnAplicaSimulacion.setVisibility(View.INVISIBLE);
-        contenedorNumeros.setVisibility(View.GONE);
+//        btnSimulacion.setVisibility(View.VISIBLE);
+//        btnFinSimulacion.setVisibility(View.INVISIBLE);
+//        btnAplicaSimulacion.setVisibility(View.INVISIBLE);
         ivJ1J1.setImageResource(R.drawable.circulo_gris);
         ivJ1J2.setImageResource(R.drawable.circulo_gris);
         ivJ1J3.setImageResource(R.drawable.circulo_gris);
@@ -448,7 +490,7 @@ public class PartidaFragment extends Fragment {
             partida = tempPartida;
             partida.put(partidaJSON);
 
-            duelo.put("partida",partida);
+            duelo.put("partida", partida);
             duelo.put("ganador", ganadorDuelo);
 
 
@@ -456,7 +498,7 @@ public class PartidaFragment extends Fragment {
             e.printStackTrace();
         }
 
-
+        mostrarDialogGanador = true;
         posicionArrayActual = datosPartida.length();
 
         verificaNuevoJuego(false);
@@ -464,54 +506,62 @@ public class PartidaFragment extends Fragment {
 
     private JSONObject calculaValor(int valorContador, int valorAOperar, String sumaOResta, String jugador, TextView textView) {
         //Si suma es 0 si resta es 1, en caso que reste multiplicar el valor por -1
-        int nuevoValor;
-        if (sumaOResta.equals("-")) {
-            nuevoValor = valorContador + (valorAOperar * -1);
+        if (valorContador > 0  || !sumaOResta.equals("-")) {
+            int nuevoValor;
+            if (sumaOResta.equals("-")) {
+                nuevoValor = valorContador + (valorAOperar * -1);
+            } else {
+                nuevoValor = valorContador + valorAOperar;
+            }
+
+            if (nuevoValor <= 0) {
+                nuevoValor = 0;
+                valorAOperar = valorContador;
+                if ( jugador.equals("1") ) {
+                    ganadorJuego = "2";
+                } else {
+                    ganadorJuego = "1";
+                }
+
+            } else {
+                ganadorJuego = "0";
+            }
+            nuevoTexto = 0;
+            animarContador(valorContador, nuevoValor, textView);
+            modificaFondo(nuevoValor, textView);
+            JSONObject movimiento = new JSONObject();
+            try {
+                SimpleDateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa");
+                Date dt = new Date();
+                String strValue = timeFormat.format(dt);
+                movimiento.put("valor_original", Integer.toString(valorContador));
+                movimiento.put("valor_operado", Integer.toString(valorAOperar));
+                movimiento.put("valor_nuevo", Integer.toString(nuevoValor));
+                movimiento.put("hora", strValue);
+                movimiento.put("operador", sumaOResta);
+                movimiento.put("jugador", jugador);
+                movimiento.put("turno", turno);
+                if (jugador.equals("1")) {
+                    contador1 = nuevoValor;
+                } else {
+                    contador2 = nuevoValor;
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return movimiento;
         } else {
-            nuevoValor = valorContador + valorAOperar;
+            return null;
         }
 
-        if (nuevoValor <= 0) {
-            nuevoValor = 0;
-            valorAOperar = valorContador;
-            if ( jugador.equals("1") ) {
-                ganadorJuego = "2";
-            } else {
-                ganadorJuego = "1";
-            }
-
-        }
-        nuevoTexto = 0;
-        animarContador(valorContador, nuevoValor, textView);
-        modificaFondo(nuevoValor, textView);
-        JSONObject movimiento = new JSONObject();
-        try {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa");
-            Date dt = new Date();
-            String strValue = timeFormat.format(dt);
-            movimiento.put("valor_original", Integer.toString(valorContador));
-            movimiento.put("valor_operado", Integer.toString(valorAOperar));
-            movimiento.put("valor_nuevo", Integer.toString(nuevoValor));
-            movimiento.put("hora", strValue);
-            movimiento.put("operador", sumaOResta);
-            movimiento.put("jugador", jugador);
-            movimiento.put("turno", turno);
-            if (jugador.equals("1")) {
-                contador1 = nuevoValor;
-            } else {
-                contador2 = nuevoValor;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return movimiento;
     }
 
 
 
-    private int calculaValorAOperar(TextView vo) {
+    private int calculaValorAOperar(String strValorAOperar) {
         int voint;
-        String strValorAOperar = vo.getText().toString();
         if (strValorAOperar.length() == 0 || strValorAOperar.equals("0") ) {
             voint= 0;
         } else {
@@ -521,7 +571,7 @@ public class PartidaFragment extends Fragment {
     }
 
     private void definirTemporizador() {
-        tvTemporizador.setBackgroundColor(getResources().getColor(R.color.rojo));
+        tvTemporizador.setBackgroundColor(getResources().getColor(R.color.fondo_contenedor_acciones));
     }
 
     private void reiniciarTemporizador() {
@@ -535,7 +585,7 @@ public class PartidaFragment extends Fragment {
         }
         valorTempo = tempoInicial;
         String text = String.format("%02d:%02d",
-                ((valorTempo/1000) % 3600) / 60, ((valorTempo/1000) % 60));
+                ((valorTempo) % 3600) / 60, ((valorTempo) % 60));
         tvTemporizador.setText(text);
         definirTemporizador();
         estadoTempo = -1;
@@ -562,20 +612,18 @@ public class PartidaFragment extends Fragment {
             case R.id.action_redo:
                 actionRedo();
                 return true;
-            case R.id.action_moneda:
-                actionMoneda();
-                return true;
-            case R.id.action_dado:
-                actionDado();
-                return true;
-            case R.id.action_log:
-                actionLog();
-                return true;
+//            case R.id.action_moneda:
+//                actionMoneda();
+//                return true;
+//            case R.id.action_dado:
+//                actionDado();
+//                return true;
+//            case R.id.action_log:
+//                actionLog();
+//                return true;
             case R.id.action_reiniciar:
+                mostrarDialogReinicio = true;
                 actionReiniciar();
-                return true;
-            case R.id.action_settings:
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -588,14 +636,27 @@ public class PartidaFragment extends Fragment {
 
 
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        tvTemporizador = (TextView) rootView.findViewById(R.id.temporizador);
+        tvTemporizador = (TextView) rootView.findViewById(R.id.tvTemporizador);
+        contadorReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                actualizaValorTempo(intent);
+            }
+        };
+
         tvValorAOperar = (TextView) (rootView.findViewById(R.id.tvValorOperado));
         tvContador1 = (TextView) (rootView.findViewById(R.id.contador1));
         tvContador2 = (TextView) (rootView.findViewById(R.id.contador2));
-        btnSimulacion = (Button) rootView.findViewById(R.id.btnSimulacion);
-        btnFinSimulacion = (Button) rootView.findViewById(R.id.btnFinSimulacion);
-        btnAplicaSimulacion = (Button) rootView.findViewById(R.id.btnAplicaSimulacion);
-        btnTurno = (Button) rootView.findViewById(R.id.turno);
+        tvLog1 = (TextView) (rootView.findViewById(R.id.tvLog1));
+        tvLog2 = (TextView) (rootView.findViewById(R.id.tvLog2));
+//        btnSimulacion = (Button) rootView.findViewById(R.id.btnSimulacion);
+//        btnFinSimulacion = (Button) rootView.findViewById(R.id.btnFinSimulacion);
+//        btnAplicaSimulacion = (Button) rootView.findViewById(R.id.btnAplicaSimulacion);
+        btnRetirada = (Button) rootView.findViewById(R.id.btnRetirada);
+        tvTurno = (TextView) rootView.findViewById(R.id.turno);
+        tvDado = (TextView) rootView.findViewById(R.id.tvDado);
+        tvMoneda = (TextView) rootView.findViewById(R.id.tvMoneda);
+        tvLog = (TextView) rootView.findViewById(R.id.tvLog);
         tvEspaciadoDerecho = (TextView) rootView.findViewById(R.id.espaciadoDerecho);
         tvEspaciadoIzquierdo = (TextView) rootView.findViewById(R.id.espaciadoIzquierdo);
         estadoTempo = -1;
@@ -611,6 +672,24 @@ public class PartidaFragment extends Fragment {
         contenedorJugador1 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador1);
         contenedorJugador2 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador2);
         contenedorNumeros.setVisibility(View.GONE);
+        tvEspaciadoDerecho.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mostrarContenedorNumeros(2);
+            }
+        });
+        tvEspaciadoIzquierdo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mostrarContenedorNumeros(1);
+            }
+        });
+        contenedorNumeros.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
         contenedorJugador1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -644,6 +723,14 @@ public class PartidaFragment extends Fragment {
                             public void run() {
                                 if (borro) {
                                     if (ladoNumeros != 0) {
+                                        long millis = System.currentTimeMillis();
+                                        String fecha = String.format("%02d:%02d:%02d",
+                                                TimeUnit.MILLISECONDS.toHours(millis),
+                                                TimeUnit.MILLISECONDS.toMinutes(millis) -
+                                                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                                                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+                                        Log.v("HoraG", "Hora:" + fecha);
                                         contenedorNumeros.setVisibility(View.GONE);
                                         ladoNumeros= 0;
                                         if (threadContenedorNumeros.isAlive()) {
@@ -662,6 +749,7 @@ public class PartidaFragment extends Fragment {
                 }
             }
         });
+
         tvTemporizador.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -680,9 +768,6 @@ public class PartidaFragment extends Fragment {
 
         if (savedInstanceState != null) {
             try {
-                valorTempo = savedInstanceState.getInt("sValorTempo",0);
-                String text = String.format("%02d:%02d", ((valorTempo/1000)% 3600) / 60, ((valorTempo/1000)% 60));
-                tvTemporizador.setText(text);
                 totalJuegos = savedInstanceState.getInt("sTotalJuegos");
                 numeroJuego = savedInstanceState.getInt("sNumeroJuego");
                 ganadorJuego = savedInstanceState.getString("sGanadorJuego");
@@ -695,11 +780,11 @@ public class PartidaFragment extends Fragment {
                 if (savedInstanceState.getString("sPartida").length() != 0) {
                     partida = new JSONArray(savedInstanceState.getString("sPartida"));
                 }
-                Log.v("PartidaFragment", "numeroJuego: " + numeroJuego );
-                Log.v("PartidaFragment", "partida: " + partida.toString());
 
-                mostrarDialog = savedInstanceState.getBoolean("sMostrarDialog");
+                mostrarDialogGanador = savedInstanceState.getBoolean("sMostrarDialogGanador");
                 verificaNuevoJuego(true);
+                mostrarDialogReinicio = savedInstanceState.getBoolean("sMostrarDialogReinicio");
+                actionReiniciar();
                 numeroJuego = savedInstanceState.getInt("sNumeroJuego");
                 ganadorJuego = savedInstanceState.getString("sGanadorJuego");
 
@@ -717,38 +802,41 @@ public class PartidaFragment extends Fragment {
                 tvContador2.setText(Integer.toString(contador2));
                 modificaFondo(contador2, tvContador2);
                 tvValorAOperar.setText(savedInstanceState.getString("sValorAOperar"));
-
+                estadoTempo = savedInstanceState.getInt("sEstadoTempo");
                 //Manejo de temporizador
-                estadoTempo = savedInstanceState.getInt("sEstadoTempo", 0);
+                valorTempo = savedInstanceState.getInt("sValorTempo",0);
+//                valorTempo = valorTempo * 1000;
                 if (estadoTempo == 1) {
-                    getActivity().registerReceiver(contadorReceiver, new IntentFilter(BroadcastCountDownService.COUNTDOWN_BR));
-                } else if (estadoTempo == 0) {
-                    valorTempo = savedInstanceState.getInt("sValorTempo",0);
-                    text = String.format("%02d:%02d", ((valorTempo/1000)% 3600) / 60, ((valorTempo/1000)% 60));
+                    estadoTempo = -1;
+                } else {
+                    String text = String.format("%02d:%02d",
+                            ((valorTempo) % 3600) / 60, ((valorTempo) % 60));
                     tvTemporizador.setText(text);
-                    tvTemporizador.setBackgroundColor(getResources().getColor(R.color.simulacion));
+                    estadoTempo = 1;
                 }
-                //manejarTemporizar();
+                manejarTemporizar();
+                //Generar log Principal
+                generarLogPrincipal();
 
-                simulando = savedInstanceState.getBoolean("sSimulando");
-                if (simulando) {
-                    RelativeLayout principio = (RelativeLayout) rootView.findViewById(R.id.principio);
-                    principio.setBackgroundColor(getResources().getColor(R.color.simulacion));
-                    try {
-                        if (savedInstanceState.getString("sPartidaSimulacion").length() > 0){
-                            partidaSimulacion = new JSONArray(savedInstanceState.getString("sPartidaSimulacion"));
-                        } else {
-                            partidaSimulacion = new JSONArray(datosPartida.toString());
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    contador1Simulacion = savedInstanceState.getInt("sContador1Simulacion");
-                    contador2Simulacion = savedInstanceState.getInt("sContador1Simulacion");
-                    btnSimulacion.setVisibility(View.INVISIBLE);
-                    btnFinSimulacion.setVisibility(View.VISIBLE);
-                    btnAplicaSimulacion.setVisibility(View.VISIBLE);
-                }
+//                simulando = savedInstanceState.getBoolean("sSimulando");
+//                if (simulando) {
+//                    RelativeLayout principio = (RelativeLayout) rootView.findViewById(R.id.principio);
+//                    principio.setBackgroundColor(getResources().getColor(R.color.simulacion));
+//                    try {
+//                        if (savedInstanceState.getString("sPartidaSimulacion").length() > 0){
+//                            partidaSimulacion = new JSONArray(savedInstanceState.getString("sPartidaSimulacion"));
+//                        } else {
+//                            partidaSimulacion = new JSONArray(datosPartida.toString());
+//                        }
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                    contador1Simulacion = savedInstanceState.getInt("sContador1Simulacion");
+//                    contador2Simulacion = savedInstanceState.getInt("sContador1Simulacion");
+//                    btnSimulacion.setVisibility(View.INVISIBLE);
+//                    btnFinSimulacion.setVisibility(View.VISIBLE);
+//                    btnAplicaSimulacion.setVisibility(View.VISIBLE);
+//                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -760,7 +848,7 @@ public class PartidaFragment extends Fragment {
         tvValorAOperar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvValorAOperar.setText("");
+                tvValorAOperar.setText("0");
             }
         });
 
@@ -782,12 +870,13 @@ public class PartidaFragment extends Fragment {
                         tvContador = tvContador2;
                     }
 
-                    int valorAOperar = calculaValorAOperar(tvValorAOperar);
+                    int valorAOperar = calculaValorAOperar(tvValorAOperar.getText().toString());
                     int valorContador = Integer.parseInt(tvContador.getText().toString());
                     if (valorAOperar != 0) {
                         JSONObject temp = calculaValor(valorContador, valorAOperar, "+", Integer.toString(jugador), tvContador);
                         if (temp != null) {
                             agregaMovimiento(temp);
+                            generarLogPrincipal();
                         }
                     }
                 }
@@ -807,44 +896,95 @@ public class PartidaFragment extends Fragment {
                         jugador = 2;
                         tvContador = tvContador2;
                     }
-                    int valorAOperar = calculaValorAOperar(tvValorAOperar);
+                    int valorAOperar = calculaValorAOperar(tvValorAOperar.getText().toString());
                     int valorContador = Integer.parseInt(tvContador.getText().toString());
                     borro= false;
                     if (valorAOperar != 0) {
                         JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador);
                         if (temp != null) {
                             agregaMovimiento(temp);
+                            generarLogPrincipal();
                         }
                     }
                 }
             });
 
-        btnSimulacion.setOnClickListener(new View.OnClickListener() {
+        btnRetirada.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                simular(rootView, 0);
-            }
-        });
-        btnFinSimulacion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                simular(rootView, 1);
-            }
-        });
-        btnAplicaSimulacion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                simular(rootView, 2);
+                int jugador,valorAOperar;
+                TextView tvContador;
+
+                if (ladoNumeros == 1) {
+                    jugador = 1;
+                    tvContador = tvContador1;
+                } else {
+                    jugador = 2;
+                    tvContador = tvContador2;
+                }
+                valorAOperar = calculaValorAOperar(tvContador.getText().toString());
+                int valorContador = Integer.parseInt(tvContador.getText().toString());
+                borro= false;
+                if (valorAOperar != 0) {
+                    try {
+                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador);
+                        if (temp != null) {
+                            temp.put("retirada",true);
+                            agregaMovimiento(temp);
+                            generarLogPrincipal();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
         });
 
+//        btnSimulacion.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                simular(rootView, 0);
+//            }
+//        });
+//        btnFinSimulacion.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                simular(rootView, 1);
+//            }
+//        });
+//        btnAplicaSimulacion.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                simular(rootView, 2);
+//            }
+//        });
 
-        btnTurno.setText(getString(R.string.boton_turno) + ": "  + Integer.toString(turno));
-        btnTurno.setOnClickListener(new View.OnClickListener() {
+        tvDado.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actionDado();
+            }
+        });
+        tvMoneda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actionMoneda();
+            }
+        });
+
+        tvLog.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actionLog();
+            }
+        });
+        tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+        tvTurno.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 turno = turno + 1;
-                btnTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+                tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
                 JSONObject movimiento = new JSONObject();
                 try {
                     SimpleDateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa");
@@ -853,7 +993,7 @@ public class PartidaFragment extends Fragment {
                     movimiento.put("valor_original", 0);
                     movimiento.put("valor_operado", 0);
                     movimiento.put("valor_nuevo", 0);
-                    movimiento.put("hora", strValue );
+                    movimiento.put("hora", strValue);
                     movimiento.put("operador", "t");
                     movimiento.put("jugador", "0");
                     movimiento.put("turno", turno);
@@ -943,6 +1083,14 @@ public class PartidaFragment extends Fragment {
     private void mostrarContenedorNumeros( int lado) {
         if (ladoNumeros == 0) {
             ladoNumeros = lado;
+            long millis = System.currentTimeMillis();
+            String fecha = String.format("%02d:%02d:%02d",
+                    TimeUnit.MILLISECONDS.toHours(millis),
+                    TimeUnit.MILLISECONDS.toMinutes(millis) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                    TimeUnit.MILLISECONDS.toSeconds(millis) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+            Log.v("HoraV", "Hora:" + fecha);
             contenedorNumeros.setVisibility(View.VISIBLE);
             if (lado == 1 ) {
                 tvEspaciadoIzquierdo.setVisibility(View.VISIBLE);
@@ -983,9 +1131,9 @@ public class PartidaFragment extends Fragment {
         } else {
             outState.putString("sDatosPartida", "");
         }
-        if (partidaSimulacion != null) {
-            outState.putString("sPartidaSimulacion", "");
-        }
+//        if (partidaSimulacion != null) {
+//            outState.putString("sPartidaSimulacion", "");
+//        }
         if (partida != null ) {
             outState.putString("sPartida", partida.toString());
         } else {
@@ -1006,13 +1154,14 @@ public class PartidaFragment extends Fragment {
         outState.putInt("sValorTempo", valorTempo);
         outState.putInt("sNumeroJuego", numeroJuego);
         outState.putInt("sValorInicial", valorInicial);
-        outState.putInt("sContador1Simulacion", contador1Simulacion);
-        outState.putInt("sContador2Simulacion", contador2Simulacion);
+//        outState.putInt("sContador1Simulacion", contador1Simulacion);
+//        outState.putInt("sContador2Simulacion", contador2Simulacion);
         outState.putInt("sContador1", contador1);
         outState.putInt("sContador2", contador2);
         outState.putInt("sLadoNumeros", ladoNumeros);
         outState.putBoolean("sSimulando", simulando);
-        outState.putBoolean("sMostrarDialog", mostrarDialog);
+        outState.putBoolean("sMostrarDialogGanador", mostrarDialogGanador);
+        outState.putBoolean("sMostrarDialogReinicio", mostrarDialogReinicio);
         outState.putString("sGanadorJuego", ganadorJuego);
         outState.putString("sGanadorDuelo", ganadorDuelo);
         outState.putString("sValorAOperar", tvValorAOperar.getText().toString());
@@ -1024,13 +1173,17 @@ public class PartidaFragment extends Fragment {
         String text = String.format("%02d:%02d",
                 (segundos % 3600) / 60, (segundos % 60));
         tvTemporizador.setText(text);
+        Log.v("segundosAVT", "" + segundos);
         valorTempo = ( int) segundos;
+        Log.v("valorTempoAVT", "" + valorTempo);
     }
 
     @Override
     public void onPause() {
         try {
-            getActivity().unregisterReceiver(contadorReceiver);
+            Log.v("onPuase", "voy a hacer una pausa" + valorTempo);
+//            getActivity().unregisterReceiver(contadorReceiver);
+//            getActivity().stopService(new Intent(getActivity(), BroadcastCountDownService.class));
         } catch (Exception e) {
 
         }
@@ -1040,11 +1193,28 @@ public class PartidaFragment extends Fragment {
     @Override
     public void onStop() {
         try{
-            getActivity().unregisterReceiver(contadorReceiver);
+            Log.v("onStop", "voy a hacer un stop");
+//            getActivity().unregisterReceiver(contadorReceiver);
         } catch (Exception e) {
 
         }
         super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.v("onDestruir", "bua destruir");
+        try {
+        if (estadoTempo != 1) {
+            getActivity().unregisterReceiver(contadorReceiver);
+        }
+            getActivity().stopService(new Intent(getActivity(), BroadcastCountDownService.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //else  {
+    //}
+        super.onDestroy();
     }
 
     public void actionUndo() {
@@ -1070,7 +1240,7 @@ public class PartidaFragment extends Fragment {
                 int valorContador = Integer.parseInt(tempTv.getText().toString());
                 if (operador.equals("t")) {
                     turno = turno - 1;
-                    btnTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+                    tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
                 } else {
                     if (operador.equals("+")) {
                         operador = "-";
@@ -1079,11 +1249,10 @@ public class PartidaFragment extends Fragment {
                     }
                     calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
                 }
-
-                if (posicionArrayActual <= 0) {
+                if (posicionArrayActual < 0) {
                     posicionArrayActual = 0;
                 }
-
+                generarLogPrincipal();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1112,17 +1281,18 @@ public class PartidaFragment extends Fragment {
 
                 if (operador.equals("t")) {
                     turno = turno + 1;
-                    btnTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+                    tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
                 } else {
                     int valorContador = Integer.parseInt(tempTv.getText().toString());
                     calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
-                    mostrarDialog = true;
+                    mostrarDialogGanador = true;
                     verificaNuevoJuego(false);
                 }
                 posicionArrayActual = posicionArrayActual + 1;
                 if (posicionArrayActual >= datosPartida.length()) {
                     posicionArrayActual = datosPartida.length();
                 }
+                generarLogPrincipal();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1143,22 +1313,107 @@ public class PartidaFragment extends Fragment {
         Intent intent = new Intent(getActivity(), LogActivity.class);
         Bundle logBundle = new Bundle();
         logBundle.putString("datosPartida", datosPartida.toString());
+        logBundle.putString("duelo", duelo.toString());
         logBundle.putInt("posicionArrayActual", posicionArrayActual);
         logBundle.putInt("valorInicial", valorInicial);
         intent.putExtras(logBundle);
         startActivity(intent);
     }
 
-    public void actionReiniciar() {
+    public void generarLogPrincipal() {
+        JSONArray datosPartidaArray;
+        String strLogJ1 = "";
+        String strLogJ2 = "";
+        String strLogTemp;
+        JSONObject tmp;
+        int c1=0, c2 = 0;
         try {
-            if (duelo.getJSONArray("partida").length() <= 1) {
-                reiniciarPartida();
-            } else {
-                empezarNuevoJuego(numeroJuego);
+            datosPartidaArray = datosPartida;
+            int fin = posicionArrayActual;
+
+            for (int i = 0; i < fin; i++) {
+                tmp = (JSONObject) datosPartidaArray.get(i);
+                if (!tmp.getString("operador").equals("t")) {
+                    strLogTemp =  tmp.getString("valor_original")  ;
+                    if (tmp.has("retirada")) {
+                        if (tmp.getBoolean("retirada")) {
+                            strLogTemp = strLogTemp + getString(R.string.texto_log_retirada);
+                        }
+                    }
+                    switch (tmp.getInt("jugador") ) {
+                        case 1:
+                            strLogJ1 = strLogTemp + "\n" + strLogJ1;
+                            c1++;
+                            break;
+                        case 2:
+                            strLogJ2 = strLogTemp + "\n" + strLogJ2;
+                            c2++;
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
-        } catch ( JSONException e) {
+            SpannableString ssLogJ1 = new SpannableString(strLogJ1);
+            SpannableString ssLogJ2 = new SpannableString(strLogJ2);
+            if (c1 >= 1 ) {
+                ssLogJ1.setSpan(new StrikethroughSpan(),0,strLogJ1.length()-1,0);
+                tvLog1.setText(ssLogJ1);
+            } else {
+                tvLog1.setText(".\n.\n.");
+            }
+            if (c2 >= 1 && !strLogJ2.equals(tvContador2.getText())) {
+                ssLogJ2.setSpan(new StrikethroughSpan(), 0, strLogJ2.length() - 1, 0);
+                tvLog2.setText(ssLogJ2);
+            } else {
+                tvLog2.setText(".\n.\n.");
+            }
+
+        } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+    public void actionReiniciar() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        empezarNuevoJuego(numeroJuego);
+                        mostrarDialogReinicio = false;
+                        break;
+                    case DialogInterface.BUTTON_NEUTRAL:
+                        mostrarDialogReinicio = false;
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        if (numeroJuego >1 ){
+                            reiniciarPartida();
+                        }
+                        mostrarDialogReinicio = false;
+                        break;
+                }
+            }
+        };
+        if (numeroJuego <= 1) {
+                if (mostrarDialogReinicio) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(getString(R.string.dialogo_texto_reincio_duelo))
+                            .setTitle(getString(R.string.dialogo_titulo_reincio))
+                            .setPositiveButton(R.string.boton_positivo_fin_juego, dialogClickListener)
+                            .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
+                            .show();
+                }
+            } else {
+                if (mostrarDialogReinicio) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(getString(R.string.dialogo_texto_reincio))
+                            .setTitle(getString(R.string.dialogo_titulo_reincio))
+                            .setPositiveButton(R.string.boton_positivo_reinicio, dialogClickListener)
+                            .setNeutralButton(R.string.boton_neutral_reinicio, dialogClickListener)
+                            .setNegativeButton(R.string.boton_negativo_reinicio, dialogClickListener)
+                            .show();
+                }
+            }
     }
 }
 

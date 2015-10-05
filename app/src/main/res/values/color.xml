@@ -6,5 +6,10 @@
     <color name="rojo_centro">#9a0707</color>
     <color name="simulacion">#00B2EE</color>
     <color name="fondo">#fff</color>
+    <color name="fondo_contenedor_acciones">#bdbdbd</color>
+    <color name="texto_botones_contenedor_acciones">#37474f</color>
+    <color name="texto_botones_contenedor_numeros">#fff</color>
+    <color name="texto_contador">#fff</color>
+    <color name="divisor_botones_contenedor_acciones">#37474f</color>
     <color name="transparent">#80000000</color>
 </resources>

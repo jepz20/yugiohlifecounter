@@ -1,14 +1,13 @@
 package hn.jepz.www.yugiohlifecounter;
 
+import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.SpannableString;
-import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +19,7 @@ import org.json.JSONObject;
  */
 public class LogActivityFragment extends Fragment {
 
+    HistoriaAdapter mHistoriaAdapter;
     public LogActivityFragment() {
     }
 
@@ -27,58 +27,44 @@ public class LogActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_log, container, false);
-        JSONArray datosPartidaArray;
-        TextView txLogJ1;
-        TextView txLogJ2;
-        int valorInicial = getActivity().getIntent().getIntExtra("valorInicial",8000);
-        String strLogJ1 =  Integer.toString(valorInicial)+ "\n";
-        String strLogJ2 = Integer.toString(valorInicial) + "\n";
-        String ultimoLogJ1="";
-        String ultimoLogJ2="";
-        txLogJ1 = (TextView) rootView.findViewById(R.id.txLogJ1);
-        txLogJ2 = (TextView) rootView.findViewById(R.id.txLogJ2);
-        txLogJ1.setTextSize(30);
-        txLogJ2.setTextSize(30);
-        try {
-            datosPartidaArray = new JSONArray(getActivity().getIntent().getStringExtra("datosPartida"));
-            int fin = getActivity().getIntent().getIntExtra("posicionArrayActual", datosPartidaArray.length());
+        ListView listView = (ListView) rootView.findViewById(R.id.listview_historia);
+        String[] columnas = new String[] {
+                "_id", "numeroJuego","ganador","datosPartida", "valor_inicial","posicionArrayActual"
+        };
 
-            if (fin == 0) {
-                datosPartidaArray.length();
+        MatrixCursor matrixcursor = new MatrixCursor(columnas);
+        getActivity().startManagingCursor(matrixcursor);
+        int valorInicial = getActivity().getIntent().getIntExtra("valorInicial",8000);
+        int fin = getActivity().getIntent().getIntExtra("posicionArrayActual", -2);
+        String strDuelo = getActivity().getIntent().getStringExtra("duelo");
+        try {
+            Log.v("Duelo", "" + strDuelo);
+            JSONObject joDuelo = new JSONObject(strDuelo);
+            JSONArray jaPartida = joDuelo.getJSONArray("partida");
+
+            for (int i = 0; i < jaPartida.length(); i++) {
+                JSONObject joPartida = (JSONObject) jaPartida.get(i);
+                String strDatosPartida = joPartida.getJSONArray("datosPartida").toString();
+                int iNumeroJuego = joPartida.getInt("numeroJuego");
+                int iGanador = joPartida.getInt("ganador");
+                matrixcursor.addRow(new Object[]{
+                        i+1, iNumeroJuego, iGanador, strDatosPartida, valorInicial,fin
+                });
+
             }
-            for (int i = 0; i < fin; i++) {
-                JSONObject tmp = (JSONObject) datosPartidaArray.get(i);
-                if (tmp.getInt("jugador") == 1) {
-                    if (!tmp.getString("operador").equals("t")) {
-                        strLogJ1 = strLogJ1 + tmp.getString("valor_nuevo") + "\n";
-                    } else {
-                        strLogJ1 = strLogJ1 + tmp.getString("operador") + "\n";
-                    }
-                 ultimoLogJ1 = tmp.getString("valor_nuevo");
-                }
-                else {
-                    if (!tmp.getString("operador").equals("t")) {
-                        strLogJ2 = strLogJ2 + tmp.getString("valor_nuevo") + "\n";
-                    } else {
-                        strLogJ2 = strLogJ2 + tmp.getString("operador") + "\n";
-                    }                }
-                ultimoLogJ2 = tmp.getString("valor_nuevo");
-            }
-            SpannableString ssLogJ1 = new SpannableString(strLogJ1);
-            SpannableString ssLogJ2 = new SpannableString(strLogJ2);
-            if (!strLogJ1.equals(Integer.toString(valorInicial) + "\n")) {
-                ssLogJ1.setSpan(new StrikethroughSpan(),0,strLogJ1.length()- ultimoLogJ1.length() -1,0);
-            }
-            if (!strLogJ2.equals(Integer.toString(valorInicial) + "\n")) {
-                ssLogJ2.setSpan(new StrikethroughSpan(), 0, strLogJ2.length() - ultimoLogJ2.length() - 1, 0);
-            }
-            Log.v("LogActivityFragment", strLogJ1);
-            txLogJ1.setText(ssLogJ1);
-            txLogJ2.setText(ssLogJ2);
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
+//        matrixcursor.addRow(new Object[]{
+//                "1", "Encabezado 1", "Puntaje de jugador 1", "Puntaje de Jugador 2"
+//        });
+        getActivity().stopManagingCursor(matrixcursor);
+        mHistoriaAdapter = new HistoriaAdapter(getActivity(),matrixcursor,0);
+
+        listView.setAdapter(mHistoriaAdapter);
 
         return rootView;
     }
