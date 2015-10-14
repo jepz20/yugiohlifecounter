@@ -35,7 +35,7 @@ public class LogActivityFragment extends Fragment {
         MatrixCursor matrixcursor = new MatrixCursor(columnas);
         getActivity().startManagingCursor(matrixcursor);
         int valorInicial = getActivity().getIntent().getIntExtra("valorInicial",8000);
-        int fin = getActivity().getIntent().getIntExtra("posicionArrayActual", -2);
+        int fin;
         String strDuelo = getActivity().getIntent().getStringExtra("duelo");
         try {
             Log.v("Duelo", "" + strDuelo);
@@ -46,9 +46,13 @@ public class LogActivityFragment extends Fragment {
                 JSONObject joPartida = (JSONObject) jaPartida.get(i);
                 String strDatosPartida = joPartida.getJSONArray("datosPartida").toString();
                 int iNumeroJuego = joPartida.getInt("numeroJuego");
-                int iGanador = joPartida.getInt("ganador");
+                String strGanador = joPartida.getString("ganador");
+                fin = -10;
+                if (i == jaPartida.length() -1) {
+                    fin = getActivity().getIntent().getIntExtra("posicionArrayActual", -2);
+                }
                 matrixcursor.addRow(new Object[]{
-                        i+1, iNumeroJuego, iGanador, strDatosPartida, valorInicial,fin
+                        i+1, iNumeroJuego, strGanador, strDatosPartida, valorInicial,fin
                 });
 
             }

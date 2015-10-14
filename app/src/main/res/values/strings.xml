@@ -36,6 +36,8 @@
     <string name="texto__ganador_log">Ganador:</string>
     <string name="texto_nombre_jugador_defecto">Jugador</string>
     <string name="texto_boton_retirada">Retirada</string>
+    <string name="texto_boton_empate">Empate</string>
+    <string name="texto_mensaje_empate">Empate</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="title_activity_moneda">Lanzar Moneda</string>

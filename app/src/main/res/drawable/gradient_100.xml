@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
+    <stroke android:width="1dip" android:color="@color/borde_contador"/>
     <gradient
-        android:startColor="#226f45"
-        android:endColor="#226f45"
+        android:startColor="@color/puntos_sanos"
+        android:endColor="@color/puntos_sanos"
         android:angle="0"/>
 </shape>

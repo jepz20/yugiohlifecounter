@@ -37,11 +37,10 @@ public class HistoriaAdapter extends android.support.v4.widget.CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         int c1=0, c2 = 0;
         int iNumeroJuego = cursor.getInt(1);
-        int iGanador = cursor.getInt(2);
+        String strGanador = cursor.getString(2);
         String strdatosPartida = cursor.getString(3);
         int valorInicial = cursor.getInt(4);
         int fin = cursor.getInt(5);
-        JSONArray datosPartidaArray;
         ArrayList<String> alJ1, alJ2;
         String strLogJ1;
         String strLogJ2;
@@ -73,14 +72,19 @@ public class HistoriaAdapter extends android.support.v4.widget.CursorAdapter {
         strTagPuntajeFinJ2 = "</pepe2><br/>";
         strLogJ1 =  strTagPuntajeInicioJ1 + Integer.toString(valorInicial) + strTagPuntajeFinJ1;
         strLogJ2 = strTagPuntajeInicioJ2 + Integer.toString(valorInicial) + strTagPuntajeFinJ2;
-        Log.v("ganador", ""+ iGanador);
-        switch (iGanador) {
-            case 1:
+        Log.v("ganador", ""+ strGanador);
+        switch (strGanador) {
+            case "1":
                 tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_verde,0,0,0);
                 tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_rojo,0,0,0);
                 break;
-            case 2: tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_rojo,0,0,0);
+            case "2":
+                tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_rojo,0,0,0);
                 tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_verde,0,0,0);
+                break;
+            case "d":
+                tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_gris,0,0,0);
+                tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_gris,0,0,0);
                 break;
             default:
                 break;
@@ -89,16 +93,18 @@ public class HistoriaAdapter extends android.support.v4.widget.CursorAdapter {
         try {
             JSONArray jaDatosPartida = new JSONArray(strdatosPartida);
 
-            if ( fin < 0  || iGanador != 0 ) {
+            if ( fin == -10) {
                 fin = jaDatosPartida.length();
             }
             for (int i = 0; i < fin; i++) {
                 JSONObject tmp = (JSONObject) jaDatosPartida.get(i);
                 strLogTempVO = tmp.getString("operador") + tmp.getString("valor_operado");
-                if (tmp.getString("operador").equals("-")) {
-                    strLogTempVO = strTagMenosInicio + strLogTempVO + strTagMenosFin;
-                } else if (tmp.getString("operador").equals("+")) {
-                    strLogTempVO = strTagMasInicio + strLogTempVO + strTagMasFin;
+                switch (tmp.getString("operador")) {
+                    case "-":
+                        strLogTempVO = strTagMenosInicio + strLogTempVO + strTagMenosFin;
+                        break;
+                    case "+":
+                        strLogTempVO = strTagMasInicio + strLogTempVO + strTagMasFin;
                 }
                 strLogTempVN = tmp.getString("valor_nuevo") ;
                 if (tmp.has("retirada")) {
@@ -129,7 +135,20 @@ public class HistoriaAdapter extends android.support.v4.widget.CursorAdapter {
                             strLogJ2 = strLogJ2 + tmp.getString("operador") + "\n";
                         }
                         ultimoLogJ2 = strLogTempVN;
-                     default:
+                        break;
+                    case 0:
+                        if (tmp.getString("operador").equals("d"))
+                        {
+                            strLogTempVN = strTagPuntajeInicioJ1 +
+                                    context.getString(R.string.texto_mensaje_empate) +
+                                    strTagPuntajeFinJ1;
+                            strLogJ1 = strLogJ1.replace("pepe","strike");
+                            strLogJ1 = strLogJ1 + strLogTempVN ;
+                            strLogJ2 = strLogJ2.replace("pepe2","strike");
+                            strLogJ2 = strLogJ2 + strLogTempVN ;
+                        }
+                        break;
+                    default:
                          break;
                 }
             }

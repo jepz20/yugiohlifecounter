@@ -2,12 +2,14 @@
 <resources>
     <color name="verde_inicio">#226f45</color>
     <color name="rojo">#9a0707</color>
-    <color name="verde_centro">#226f45</color>
-    <color name="rojo_centro">#9a0707</color>
+    <color name="puntos_sanos">#226f45</color>
+    <color name="puntos_bajados">#9a0707</color>
+    <color name="borde_contador">#C8E6C9</color>
     <color name="simulacion">#00B2EE</color>
     <color name="fondo">#fff</color>
-    <color name="fondo_contenedor_acciones">#bdbdbd</color>
-    <color name="texto_botones_contenedor_acciones">#37474f</color>
+    <color name="fondo_contenedor_acciones">#1B5E20</color>
+    <color name="fondo_contenedor_acciones_press">#388E3C</color>
+    <color name="texto_botones_contenedor_acciones">#fff</color>
     <color name="texto_botones_contenedor_numeros">#fff</color>
     <color name="texto_contador">#fff</color>
     <color name="divisor_botones_contenedor_acciones">#37474f</color>

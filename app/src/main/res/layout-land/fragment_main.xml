@@ -163,6 +163,7 @@
                 android:text="T:1"
                 android:textSize="20sp"
                 android:textColor="@color/texto_botones_contenedor_acciones"
+                android:background="@drawable/boton_contenedor_acciones"
                 android:gravity="center"
                 android:id="@+id/turno" />
             <TextView
@@ -172,6 +173,7 @@
                 android:textSize="20sp"
                 android:gravity="center"
                 android:textColor="@color/texto_botones_contenedor_acciones"
+                android:background="@drawable/boton_contenedor_acciones"
                 android:id="@+id/tvTemporizador"
                 android:text="45:00"/>
             <RelativeLayout
@@ -185,6 +187,7 @@
                     android:textSize="15sp"
                     android:gravity="center|bottom"
                     android:textColor="@color/texto_botones_contenedor_acciones"
+                    android:background="@drawable/boton_contenedor_acciones"
                     android:id="@+id/tvDado" />
                 <ImageView
                     android:layout_width="40dp"
@@ -201,6 +204,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:textColor="@color/texto_botones_contenedor_acciones"
+                    android:background="@drawable/boton_contenedor_acciones"
                     android:text="@string/boton_moneda_texto"
                     android:textSize="15sp"
                     android:gravity="center|bottom"
@@ -222,6 +226,7 @@
                     android:textSize="15sp"
                     android:gravity="center|bottom"
                     android:textColor="@color/texto_botones_contenedor_acciones"
+                    android:background="@drawable/boton_contenedor_acciones"
                     android:id="@+id/tvLog"
                     android:text="@string/action_log"/>
                 <ImageView
@@ -262,14 +267,29 @@
                     android:layout_weight="1"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_weight="1"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:background="@drawable/round_button"
-                        android:text="@string/texto_boton_retirada"
-                        android:textColor="@color/texto_botones_contenedor_numeros"
-                        android:id="@+id/btnRetirada"/>
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+                        <Button
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/boton_calculadora"
+                            android:text="@string/texto_boton_retirada"
+                            android:textColor="@color/texto_botones_contenedor_numeros"
+                            android:id="@+id/btnRetirada"/>
+                        <Button
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/boton_calculadora"
+                            android:text="@string/texto_boton_empate"
+                            android:textColor="@color/texto_botones_contenedor_numeros"
+                            android:id="@+id/btnEmpate"/>
+                    </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -287,7 +307,7 @@
                                 android:gravity="bottom|center"
                                 android:textSize="30sp"
                                 android:id="@+id/suma1"
-                                android:background="@drawable/round_button"/>
+                                android:background="@drawable/boton_calculadora"/>
                             <ImageView
                                 android:layout_width="100dp"
                                 android:layout_height="100dp"
@@ -305,7 +325,7 @@
                                 android:textColor="@color/texto_botones_contenedor_numeros"
                                 android:textSize="30sp"
                                 android:id="@+id/resta1"
-                                android:background="@drawable/round_button"/>
+                                android:background="@drawable/boton_calculadora"/>
 
                             <ImageView
                                 android:layout_width="100dp"
@@ -359,7 +379,7 @@
                         android:layout_weight="1"
                         android:text="C"
                         android:textSize="25dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:id="@+id/btnBorrar"/>
                 </LinearLayout>
@@ -369,7 +389,7 @@
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -380,7 +400,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -391,7 +411,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -406,7 +426,7 @@
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -417,7 +437,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -428,7 +448,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -443,7 +463,7 @@
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -453,7 +473,7 @@
                         android:id="@+id/btnSiete"/>
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -464,7 +484,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -479,7 +499,7 @@
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -490,7 +510,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -501,7 +521,7 @@
 
                     <Button
                         android:layout_width="0dp"
-                        android:background="@drawable/round_button"
+                        android:background="@drawable/boton_calculadora"
                         android:textColor="@color/texto_botones_contenedor_numeros"
                         android:textSize="30sp"
                         android:layout_margin="0dp"
@@ -516,8 +536,7 @@
         </LinearLayout>
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"/>
+            android:layout_height="55dp"/>
 
     </LinearLayout>
 </RelativeLayout>

@@ -2,7 +2,22 @@
 
     <!-- Base application theme. -->
     <style name="ThemeLight" parent="android:Theme.Holo.Light">
-        <!-- Customize your theme here. -->
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="actionBarStyle">@style/MyActionBar</item>
+    </style>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <item name="actionBarStyle">@style/MyActionBarAppCompat</item>
+    </style>
+
+    <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/fondo_contenedor_acciones</item>
+        <item name="android:textColor">@color/texto_botones_contenedor_acciones</item>
+    </style>
+
+    <style name="MyActionBarAppCompat" parent="@style/Widget.AppCompat.Light.ActionBar">
+        <item name="android:background">@color/fondo_contenedor_acciones</item>
+        <item name="android:textColor">@color/texto_botones_contenedor_acciones</item>
     </style>
 
 </resources>

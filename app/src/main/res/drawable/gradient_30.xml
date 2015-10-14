@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
+    <stroke android:width="1dip" android:color="@color/borde_contador"/>
     <gradient
-        android:startColor="@color/verde_inicio"
-        android:endColor="@color/rojo"
+        android:startColor="@color/puntos_sanos"
+        android:endColor="@color/puntos_bajados"
         android:centerX="0.15"
         android:centerY="0.15"
         android:angle="0"
-        android:centerColor="@color/verde_centro"/>
+        android:centerColor="@color/puntos_sanos"/>
 </shape>

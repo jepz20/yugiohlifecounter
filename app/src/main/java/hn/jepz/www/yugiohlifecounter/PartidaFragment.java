@@ -45,17 +45,18 @@ import java.util.concurrent.TimeUnit;
  * A Fragmento donde esta la partida.
  */
 public class PartidaFragment extends Fragment {
-    private int posicionArrayActual, turno, nuevoTexto,cantidadJugadores, jugadorActual, contador1Simulacion,
-            contador2Simulacion,contador1,contador2, valorTempo, tempoInicial, numeroJuego, valorInicial, totalJuegos;
+    private int posicionArrayActual, turno, nuevoTexto,cantidadJugadores, jugadorActual,
+            contador1Simulacion, contador2Simulacion,contador1,contador2, valorTempo,
+            tempoInicial, numeroJuego, valorInicial, totalJuegos,segundosContenedor;
     private int ladoNumeros; //0 ningun lado, 1 jugador1, 2 jugador2 etc..
     private int estadoTempo; //-1 sin iniciar, 0 detenido, 1 contando
     private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador;
     private TextView tvTurno,tvEspaciadoDerecho, tvEspaciadoIzquierdo, tvLog1, tvLog2;
     private TextView tvDado, tvMoneda,tvLog;
-    private boolean simulando, borro;
+    private boolean simulando, borro, interrumpo;
     private boolean mostrarDialogGanador = true;
     private boolean mostrarDialogReinicio = false;
-    private Button  btnSimulacion, btnFinSimulacion, btnAplicaSimulacion, btnRetirada;
+    private Button  btnSimulacion, btnFinSimulacion, btnAplicaSimulacion, btnRetirada, btnEmpate;
     private JSONArray datosPartida, partidaSimulacion, partida;
     private JSONObject duelo;
     private ImageView ivJ1J1,ivJ1J2,ivJ1J3,ivJ2J1,ivJ2J2,ivJ2J3;
@@ -63,7 +64,7 @@ public class PartidaFragment extends Fragment {
     private LinearLayout contenedorGanados1, contenedorGanados2,contenedorNumeros,
             contenedorJugador1, contenedorJugador2;
     private Handler mHandler = new Handler();
-    Thread threadContenedorNumeros;
+    private Thread threadContenedorNumeros;
     private BroadcastReceiver contadorReceiver;
 
     public PartidaFragment() {
@@ -183,7 +184,6 @@ public class PartidaFragment extends Fragment {
 //            btnAplicaSimulacion.setVisibility(View.VISIBLE);
 //
 //        } else if (accion == 1) {
-//            //TODO mejorar botones de undo y redo
 //            simulando = false;
 //            principio.setBackgroundColor(getResources().getColor(R.color.fondo));
 //            btnSimulacion.setVisibility(View.VISIBLE);
@@ -306,35 +306,63 @@ public class PartidaFragment extends Fragment {
     }
 
     private void modificaIdentificadorGanados() {
-        //TODO cuando se reversa despues de ganar siempre quedan los iconos que se gano
-        if (numeroJuego == 1) {
-            if ( ganadorJuego.equals("1")) {
-                ivJ1J1.setImageResource(R.drawable.circulo_verde);
-                ivJ2J1.setImageResource(R.drawable.circulo_rojo);
-            } else {
-                ivJ1J1.setImageResource(R.drawable.circulo_rojo);
-                ivJ2J1.setImageResource(R.drawable.circulo_verde);
-            }
-        }
-
-        if (numeroJuego == 2) {
-            if ( ganadorJuego.equals("1")) {
-                ivJ1J2.setImageResource(R.drawable.circulo_verde);
-                ivJ2J2.setImageResource(R.drawable.circulo_rojo);
-            } else {
-                ivJ1J2.setImageResource(R.drawable.circulo_rojo);
-                ivJ2J2.setImageResource(R.drawable.circulo_verde);
-            }
-        }
-
-        if (numeroJuego == 3) {
-            if ( ganadorJuego.equals("1")) {
-                ivJ1J3.setImageResource(R.drawable.circulo_verde);
-                ivJ2J3.setImageResource(R.drawable.circulo_rojo);
-            } else {
-                ivJ1J3.setImageResource(R.drawable.circulo_rojo);
-                ivJ2J3.setImageResource(R.drawable.circulo_verde);
-            }
+        switch (numeroJuego) {
+            case 1:
+                switch (ganadorJuego) {
+                    case "1":
+                        ivJ1J1.setImageResource(R.drawable.circulo_verde);
+                        ivJ2J1.setImageResource(R.drawable.circulo_rojo);
+                        break;
+                    case "2" :
+                        ivJ1J1.setImageResource(R.drawable.circulo_rojo);
+                        ivJ2J1.setImageResource(R.drawable.circulo_verde);
+                        break;
+                    case "d" :
+                        ivJ1J1.setImageResource(R.drawable.circulo_gris);
+                        ivJ2J1.setImageResource(R.drawable.circulo_gris);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 2:
+                switch (ganadorJuego) {
+                    case "1":
+                        ivJ1J2.setImageResource(R.drawable.circulo_verde);
+                        ivJ2J2.setImageResource(R.drawable.circulo_rojo);
+                        break;
+                    case "2" :
+                        ivJ1J2.setImageResource(R.drawable.circulo_rojo);
+                        ivJ2J2.setImageResource(R.drawable.circulo_verde);
+                        break;
+                    case "d" :
+                        ivJ1J2.setImageResource(R.drawable.circulo_gris);
+                        ivJ2J2.setImageResource(R.drawable.circulo_gris);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 3:
+                switch (ganadorJuego) {
+                    case "1":
+                        ivJ1J3.setImageResource(R.drawable.circulo_verde);
+                        ivJ2J3.setImageResource(R.drawable.circulo_rojo);
+                        break;
+                    case "2" :
+                        ivJ1J3.setImageResource(R.drawable.circulo_rojo);
+                        ivJ2J3.setImageResource(R.drawable.circulo_verde);
+                        break;
+                    case "d" :
+                        ivJ1J3.setImageResource(R.drawable.circulo_gris);
+                        ivJ2J3.setImageResource(R.drawable.circulo_gris);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -365,8 +393,13 @@ public class PartidaFragment extends Fragment {
         tvContador2.setBackgroundResource(R.drawable.gradient_100);
         tvValorAOperar.setText("0");
         contenedorNumeros.setVisibility(View.GONE);
+        if (interrumpo == true) {
+            interrumpo = true;
+            segundosContenedor = 0;
+        }
         if (threadContenedorNumeros.isAlive()) {
             threadContenedorNumeros.interrupt();
+            segundosContenedor = 0;
         }
         tvLog1.setText(".\n.\n.");
         tvLog2.setText(".\n.\n.");
@@ -466,7 +499,6 @@ public class PartidaFragment extends Fragment {
 
     private void agregaMovimiento (JSONObject movimiento) {
         JSONArray tempDatosPartida = new JSONArray();
-        JSONArray tempPartida = new JSONArray();
         if (posicionArrayActual != datosPartida.length() ) {
             try {
                 for (int i = 0; i <= posicionArrayActual -1 ; i++) {
@@ -477,9 +509,18 @@ public class PartidaFragment extends Fragment {
             }
             datosPartida = tempDatosPartida;
         }
+        datosPartida.put(movimiento);
+        modificarPartida();
 
+        mostrarDialogGanador = true;
+        posicionArrayActual = datosPartida.length();
+
+        verificaNuevoJuego(false);
+    }
+
+    private void modificarPartida() {
         try {
-            datosPartida.put(movimiento);
+            JSONArray tempPartida = new JSONArray();
             JSONObject partidaJSON = new JSONObject();
             partidaJSON.put("numeroJuego", Integer.toString(numeroJuego));
             partidaJSON.put("ganador", ganadorJuego );
@@ -497,12 +538,76 @@ public class PartidaFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        mostrarDialogGanador = true;
-        posicionArrayActual = datosPartida.length();
-
-        verificaNuevoJuego(false);
     }
+private void crearThread() {
+    threadContenedorNumeros = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis();
+            String fecha = String.format("%02d:%02d:%02d",
+                    TimeUnit.MILLISECONDS.toHours(millis),
+                    TimeUnit.MILLISECONDS.toMinutes(millis) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                    TimeUnit.MILLISECONDS.toSeconds(millis) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+
+            while (!interrumpo && segundosContenedor <5) {
+                Log.v("HoraisInterrupted", "Hora:" + fecha);
+                Log.v("IFInterrupted", "YEInterrupted" + threadContenedorNumeros.isInterrupted());
+                Log.v("IFInterrupted", "YEAlive" + threadContenedorNumeros.isAlive());
+                try {
+                    Thread.sleep(1000);
+                    Log.v("segundosContenedor", "segundosContenedor: " + segundosContenedor);
+                    Log.v("isInterrupted", "isInterrupted" + threadContenedorNumeros.isInterrupted());
+                    Log.v("interrumpo", "interrumpo: " + interrumpo);
+                    if (segundosContenedor >=4) {
+                        mHandler.post(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                if (borro) {
+                                    if (ladoNumeros != 0) {
+                                        long millis = System.currentTimeMillis();
+                                        String fecha = String.format("%02d:%02d:%02d",
+                                                TimeUnit.MILLISECONDS.toHours(millis),
+                                                TimeUnit.MILLISECONDS.toMinutes(millis) -
+                                                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                                                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+                                        Log.v("HoraG", "Hora:" + fecha);
+                                        contenedorNumeros.setVisibility(View.GONE);
+                                        ladoNumeros= 0;
+                                        interrumpo = true;
+                                        segundosContenedor = 0;
+                                        Log.v("IFInterrupted", "IFInterrupted" + threadContenedorNumeros.isInterrupted());
+                                        Log.v("IFInterrupted", "iFAlive" + threadContenedorNumeros.isAlive());
+                                                threadContenedorNumeros.interrupt();
+//                                            if (threadContenedorNumeros.isAlive()) {
+//                                                Log.v("IFInterrupted", "IFInterrupted" + threadContenedorNumeros.isInterrupted());
+//                                                Log.v("IFInterrupted", "iFAlive" + threadContenedorNumeros.isAlive());
+//                                                segundosContenedor = 0;
+//                                            }
+                                        borro = false;
+                                    }
+                                } else {
+                                    borro = true;
+                                }
+
+                            }
+                        });
+                    } else {
+                        segundosContenedor++;
+                    }
+
+                } catch (InterruptedException  e) {
+                    e.printStackTrace();
+                }
+            }
+            segundosContenedor = 0;
+            Log.v("exit","me sali del loop");
+        }
+    });
+}
 
     private JSONObject calculaValor(int valorContador, int valorAOperar, String sumaOResta, String jugador, TextView textView) {
         //Si suma es 0 si resta es 1, en caso que reste multiplicar el valor por -1
@@ -517,12 +622,16 @@ public class PartidaFragment extends Fragment {
             if (nuevoValor <= 0) {
                 nuevoValor = 0;
                 valorAOperar = valorContador;
-                if ( jugador.equals("1") ) {
-                    ganadorJuego = "2";
-                } else {
-                    ganadorJuego = "1";
+                switch (jugador) {
+                    case "1" :
+                        ganadorJuego = "2";
+                        break;
+                    case "2" :
+                        ganadorJuego = "1";
+                        break;
+                    default:
+                        break;
                 }
-
             } else {
                 ganadorJuego = "0";
             }
@@ -643,7 +752,8 @@ public class PartidaFragment extends Fragment {
                 actualizaValorTempo(intent);
             }
         };
-
+        segundosContenedor = 0;
+        interrumpo = false;
         tvValorAOperar = (TextView) (rootView.findViewById(R.id.tvValorOperado));
         tvContador1 = (TextView) (rootView.findViewById(R.id.contador1));
         tvContador2 = (TextView) (rootView.findViewById(R.id.contador2));
@@ -653,6 +763,7 @@ public class PartidaFragment extends Fragment {
 //        btnFinSimulacion = (Button) rootView.findViewById(R.id.btnFinSimulacion);
 //        btnAplicaSimulacion = (Button) rootView.findViewById(R.id.btnAplicaSimulacion);
         btnRetirada = (Button) rootView.findViewById(R.id.btnRetirada);
+        btnEmpate = (Button) rootView.findViewById(R.id.btnEmpate);
         tvTurno = (TextView) rootView.findViewById(R.id.turno);
         tvDado = (TextView) rootView.findViewById(R.id.tvDado);
         tvMoneda = (TextView) rootView.findViewById(R.id.tvMoneda);
@@ -711,44 +822,7 @@ public class PartidaFragment extends Fragment {
 
         //Handler para desaparecer los numero despues de x segundos
 
-        threadContenedorNumeros = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!threadContenedorNumeros.isInterrupted()) {
-                    try {
-                        Thread.sleep(4000);
-                        mHandler.post(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                if (borro) {
-                                    if (ladoNumeros != 0) {
-                                        long millis = System.currentTimeMillis();
-                                        String fecha = String.format("%02d:%02d:%02d",
-                                                TimeUnit.MILLISECONDS.toHours(millis),
-                                                TimeUnit.MILLISECONDS.toMinutes(millis) -
-                                                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
-                                                TimeUnit.MILLISECONDS.toSeconds(millis) -
-                                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
-                                        Log.v("HoraG", "Hora:" + fecha);
-                                        contenedorNumeros.setVisibility(View.GONE);
-                                        ladoNumeros= 0;
-                                        if (threadContenedorNumeros.isAlive()) {
-                                            threadContenedorNumeros.interrupt();
-                                        }
-                                        borro = false;
-                                    }
-                                } else {
-                                    borro = true;
-                                }
-
-                            }
-                        });
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
+        crearThread();
 
         tvTemporizador.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1005,6 +1079,29 @@ public class PartidaFragment extends Fragment {
 
             }
         });
+        btnEmpate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JSONObject movimiento = new JSONObject();
+                try {
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa");
+                    Date dt = new Date();
+                    String strValue = timeFormat.format(dt);
+                    movimiento.put("valor_original", 0);
+                    movimiento.put("valor_operado", 0);
+                    movimiento.put("valor_nuevo", 0);
+                    movimiento.put("hora", strValue);
+                    movimiento.put("operador", "d");
+                    movimiento.put("jugador", "0");
+                    movimiento.put("empate", true);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ganadorJuego = "d";
+                agregaMovimiento(movimiento);
+                generarLogPrincipal();
+            }
+        });
 
         for (int i = -3; i < 10 ; i++) {
             str = "0";
@@ -1082,6 +1179,7 @@ public class PartidaFragment extends Fragment {
 
     private void mostrarContenedorNumeros( int lado) {
         if (ladoNumeros == 0) {
+            Log.v("llamo interrumpo0",""+ interrumpo);
             ladoNumeros = lado;
             long millis = System.currentTimeMillis();
             String fecha = String.format("%02d:%02d:%02d",
@@ -1099,10 +1197,17 @@ public class PartidaFragment extends Fragment {
                 tvEspaciadoIzquierdo.setVisibility(View.GONE);
                 tvEspaciadoDerecho.setVisibility(View.VISIBLE);
             }
-            if (!threadContenedorNumeros.isAlive()) {
-                threadContenedorNumeros.start();
+            if (interrumpo == true) {
+                interrumpo = false;
+                threadContenedorNumeros.interrupt();
+                segundosContenedor = 0;
             }
+            Log.v("IFInterrupted", "YE2Interrupted" + threadContenedorNumeros.isInterrupted());
+            Log.v("IFInterrupted", "YE2Alive" + threadContenedorNumeros.isAlive());
+            crearThread();
+            threadContenedorNumeros.start();
         } else if (ladoNumeros != lado) {
+            Log.v("llamo interrumpo2",""+ interrumpo);
             ladoNumeros = lado;
             if (lado == 1 ) {
                 tvEspaciadoIzquierdo.setVisibility(View.VISIBLE);
@@ -1112,14 +1217,17 @@ public class PartidaFragment extends Fragment {
                 tvEspaciadoDerecho.setVisibility(View.VISIBLE);
             }
             threadContenedorNumeros.interrupt();
-            if (!threadContenedorNumeros.isAlive()) {
-                threadContenedorNumeros.start();
-            }
+            interrumpo = true;
+            segundosContenedor = 0;
         } else {
+            Log.v("llamo interrumpo1",""+ interrumpo);
             ladoNumeros = 0;
             contenedorNumeros.setVisibility(View.GONE);
-            if (threadContenedorNumeros.isAlive()) {
+            if (interrumpo = false) {
+                interrumpo = true;
                 threadContenedorNumeros.interrupt();
+                Log.v("JOInterrupted", "JOInterrupted" + threadContenedorNumeros.isInterrupted());
+                segundosContenedor = 0;
             }
         }
     }
@@ -1238,16 +1346,36 @@ public class PartidaFragment extends Fragment {
                         break;
                 }
                 int valorContador = Integer.parseInt(tempTv.getText().toString());
+
+                switch (operador) {
+                    case "t" :
+                        turno = turno - 1;
+                        tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+                        break;
+                    case "-" :
+                        operador = "+";
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        break;
+                    case "+" :
+                        operador = "-";
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        break;
+                    case "d" :
+                        ganadorJuego = "0";
+                        modificarPartida();
+                        break;
+                    default:
+                        break;
+                }
                 if (operador.equals("t")) {
-                    turno = turno - 1;
-                    tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+
                 } else {
                     if (operador.equals("+")) {
-                        operador = "-";
+
                     } else {
-                        operador = "+";
+
                     }
-                    calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+
                 }
                 if (posicionArrayActual < 0) {
                     posicionArrayActual = 0;
@@ -1278,15 +1406,30 @@ public class PartidaFragment extends Fragment {
                         tempTv = tvContador1;
                         break;
                 }
-
-                if (operador.equals("t")) {
-                    turno = turno + 1;
-                    tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
-                } else {
-                    int valorContador = Integer.parseInt(tempTv.getText().toString());
-                    calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
-                    mostrarDialogGanador = true;
-                    verificaNuevoJuego(false);
+                int valorContador;
+                switch (operador) {
+                    case "t" :
+                        turno = turno + 1;
+                        tvTurno.setText(getString(R.string.boton_turno) + ": " + Integer.toString(turno));
+                        break;
+                    case "+" :
+                        valorContador = Integer.parseInt(tempTv.getText().toString());
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        mostrarDialogGanador = true;
+                        verificaNuevoJuego(false);
+                        break;
+                    case "-" :
+                        valorContador = Integer.parseInt(tempTv.getText().toString());
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        mostrarDialogGanador = true;
+                        verificaNuevoJuego(false);
+                        break;
+                    case "d":
+                        ganadorJuego = "d";
+                        modificarPartida();
+                        break;
+                    default:
+                        break;
                 }
                 posicionArrayActual = posicionArrayActual + 1;
                 if (posicionArrayActual >= datosPartida.length()) {
@@ -1334,7 +1477,11 @@ public class PartidaFragment extends Fragment {
             for (int i = 0; i < fin; i++) {
                 tmp = (JSONObject) datosPartidaArray.get(i);
                 if (!tmp.getString("operador").equals("t")) {
-                    strLogTemp =  tmp.getString("valor_original")  ;
+                    if (tmp.getString("operador").equals("d")) {
+                        strLogTemp =  getActivity().getString(R.string.texto_mensaje_empate);
+                    } else {
+                        strLogTemp =  tmp.getString("valor_original")  ;
+                    }
                     if (tmp.has("retirada")) {
                         if (tmp.getBoolean("retirada")) {
                             strLogTemp = strLogTemp + getString(R.string.texto_log_retirada);
@@ -1349,6 +1496,11 @@ public class PartidaFragment extends Fragment {
                             strLogJ2 = strLogTemp + "\n" + strLogJ2;
                             c2++;
                             break;
+                        case 0:
+                            strLogJ1 = strLogTemp + "\n" + strLogJ1;
+                            strLogJ2 = strLogTemp + "\n" + strLogJ2;
+                            c1++;
+                            c2++;
                         default:
                             break;
                     }
