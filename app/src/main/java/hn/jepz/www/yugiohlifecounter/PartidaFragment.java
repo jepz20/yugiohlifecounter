@@ -393,12 +393,8 @@ public class PartidaFragment extends Fragment {
         tvContador2.setBackgroundResource(R.drawable.gradient_100);
         tvValorAOperar.setText("0");
         contenedorNumeros.setVisibility(View.GONE);
-        if (interrumpo == true) {
+        if (!interrumpo) {
             interrumpo = true;
-            segundosContenedor = 0;
-        }
-        if (threadContenedorNumeros.isAlive()) {
-            threadContenedorNumeros.interrupt();
             segundosContenedor = 0;
         }
         tvLog1.setText(".\n.\n.");
@@ -552,14 +548,8 @@ private void crearThread() {
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
 
             while (!interrumpo && segundosContenedor <5) {
-                Log.v("HoraisInterrupted", "Hora:" + fecha);
-                Log.v("IFInterrupted", "YEInterrupted" + threadContenedorNumeros.isInterrupted());
-                Log.v("IFInterrupted", "YEAlive" + threadContenedorNumeros.isAlive());
                 try {
                     Thread.sleep(1000);
-                    Log.v("segundosContenedor", "segundosContenedor: " + segundosContenedor);
-                    Log.v("isInterrupted", "isInterrupted" + threadContenedorNumeros.isInterrupted());
-                    Log.v("interrumpo", "interrumpo: " + interrumpo);
                     if (segundosContenedor >=4) {
                         mHandler.post(new Runnable() {
 
@@ -579,14 +569,6 @@ private void crearThread() {
                                         ladoNumeros= 0;
                                         interrumpo = true;
                                         segundosContenedor = 0;
-                                        Log.v("IFInterrupted", "IFInterrupted" + threadContenedorNumeros.isInterrupted());
-                                        Log.v("IFInterrupted", "iFAlive" + threadContenedorNumeros.isAlive());
-                                                threadContenedorNumeros.interrupt();
-//                                            if (threadContenedorNumeros.isAlive()) {
-//                                                Log.v("IFInterrupted", "IFInterrupted" + threadContenedorNumeros.isInterrupted());
-//                                                Log.v("IFInterrupted", "iFAlive" + threadContenedorNumeros.isAlive());
-//                                                segundosContenedor = 0;
-//                                            }
                                         borro = false;
                                     }
                                 } else {
@@ -1169,7 +1151,7 @@ private void crearThread() {
                             tvValorAOperar.setText("0");
                     }
                     modificaValorAOperar(tvValorAOperar, strLocal);
-                    borro= false;
+                    segundosContenedor = 0;
                 }
             });
         }
@@ -1179,7 +1161,6 @@ private void crearThread() {
 
     private void mostrarContenedorNumeros( int lado) {
         if (ladoNumeros == 0) {
-            Log.v("llamo interrumpo0",""+ interrumpo);
             ladoNumeros = lado;
             long millis = System.currentTimeMillis();
             String fecha = String.format("%02d:%02d:%02d",
@@ -1197,17 +1178,13 @@ private void crearThread() {
                 tvEspaciadoIzquierdo.setVisibility(View.GONE);
                 tvEspaciadoDerecho.setVisibility(View.VISIBLE);
             }
-            if (interrumpo == true) {
+            if (interrumpo) {
                 interrumpo = false;
-                threadContenedorNumeros.interrupt();
                 segundosContenedor = 0;
             }
-            Log.v("IFInterrupted", "YE2Interrupted" + threadContenedorNumeros.isInterrupted());
-            Log.v("IFInterrupted", "YE2Alive" + threadContenedorNumeros.isAlive());
             crearThread();
             threadContenedorNumeros.start();
         } else if (ladoNumeros != lado) {
-            Log.v("llamo interrumpo2",""+ interrumpo);
             ladoNumeros = lado;
             if (lado == 1 ) {
                 tvEspaciadoIzquierdo.setVisibility(View.VISIBLE);
@@ -1216,17 +1193,13 @@ private void crearThread() {
                 tvEspaciadoIzquierdo.setVisibility(View.GONE);
                 tvEspaciadoDerecho.setVisibility(View.VISIBLE);
             }
-            threadContenedorNumeros.interrupt();
             interrumpo = true;
             segundosContenedor = 0;
         } else {
-            Log.v("llamo interrumpo1",""+ interrumpo);
             ladoNumeros = 0;
             contenedorNumeros.setVisibility(View.GONE);
-            if (interrumpo = false) {
+            if (!interrumpo) {
                 interrumpo = true;
-                threadContenedorNumeros.interrupt();
-                Log.v("JOInterrupted", "JOInterrupted" + threadContenedorNumeros.isInterrupted());
                 segundosContenedor = 0;
             }
         }
