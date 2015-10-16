@@ -18,11 +18,11 @@
     <string name="boton_aplica_simulacion">Aplicar</string>
     <string name="boton_dado_texto">Dado</string>
     <string name="boton_moneda_texto">Moneda</string>
-    <string name="dialogo_titulo_fin_juego">Gano el Jugador </string>
+    <string name="dialogo_titulo_fin_juego">El Ganador es </string>
     <string name="dialogo_texto_fin_juego">Deseas Iniciar el Duelo No.</string>
     <string name="boton_positivo_fin_juego">Si</string>
     <string name="boton_negativo_fin_juego">No</string>
-    <string name="dialogo_texto_fin_partida_p1">EL GANADOR DE LA PARTIDA ES EL JUGADOR</string>
+    <string name="dialogo_texto_fin_partida_p1">EL GANADOR DE LA PARTIDA ES </string>
     <string name="dialogo_texto_fin_partida_p2">!!! \n Deseas Iniciar una nueva Partida?</string>
     <string name="dialogo_texto_reincio_duelo">Desea reiniciar el duelo?</string>
     <string name="dialogo_texto_reincio">Que desea reiniciar?</string>

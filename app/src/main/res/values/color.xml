@@ -14,4 +14,5 @@
     <color name="texto_contador">#fff</color>
     <color name="divisor_botones_contenedor_acciones">#37474f</color>
     <color name="transparent">#80000000</color>
+    <color name="fondo_calculadora">#CC2E7D32</color>
 </resources>

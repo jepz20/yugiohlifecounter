@@ -80,7 +80,7 @@
                             android:paddingLeft="5dp"
                             android:paddingRight="5dp"/>
                         <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
                             android:id="@+id/tvNombreJ1"
@@ -91,17 +91,21 @@
                             android:gravity="bottom" />
                     </LinearLayout>
                 </RelativeLayout>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:id="@+id/tvLog1"
-                    android:enabled="false"
-                    android:textSize="40sp"
+                <ScrollView
+                    android:layout_width="match_parent"
                     android:layout_weight="4"
-                    android:layout_height="0dp"
-                    android:gravity="center_horizontal"
-                    android:text="4500\n6000\n7500\n8000"
-                    />
+                    android:layout_height="0dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/tvLog1"
+                        android:enabled="false"
+                        android:textSize="40sp"
+                        android:gravity="center_horizontal"
+                        android:text="4500\n6000\n7500\n8000"
+                        />
+                </ScrollView>
+
             </LinearLayout>
             <LinearLayout
                 android:layout_width="0dp"
@@ -166,7 +170,7 @@
                             android:paddingLeft="5dp"
                             android:paddingRight="5dp"/>
                         <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
                             android:id="@+id/tvNombreJ2"
@@ -177,16 +181,20 @@
                             android:gravity="bottom"/>
                     </LinearLayout>
                 </RelativeLayout>
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:id="@+id/tvLog2"
-                    android:textSize="40sp"
-                    android:enabled="false"
+                <ScrollView
+                    android:layout_width="match_parent"
                     android:layout_weight="4"
-                    android:layout_height="0dp"
-                    android:gravity="center_horizontal"
-                    android:text="4500\n6000\n7500\n8000"
-                    />
+                    android:layout_height="0dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/tvLog2"
+                        android:enabled="false"
+                        android:textSize="40sp"
+                        android:gravity="center_horizontal"
+                        android:text="4500\n6000\n7500\n8000"
+                        />
+                </ScrollView>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -305,7 +313,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@color/transparent"
+                android:background="@color/fondo_calculadora"
                 android:layout_weight="1">
                 <LinearLayout
                     android:layout_width="0dp"
@@ -392,7 +400,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="14"
+            android:layout_weight="16
+            "
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
@@ -400,7 +409,7 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:background="@color/transparent">
+                android:background="@color/fondo_calculadora">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"

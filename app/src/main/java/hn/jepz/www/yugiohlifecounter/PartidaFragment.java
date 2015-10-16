@@ -18,9 +18,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.text.InputType;
-import android.text.SpannableString;
-import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -57,7 +56,7 @@ public class PartidaFragment extends Fragment {
     private int ladoNumeros; //0 ningun lado, 1 jugador1, 2 jugador2 etc..
     private int estadoTempo; //-1 sin iniciar, 0 detenido, 1 contando
     private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador;
-    private TextView tvTurno,tvEspaciadoDerecho, tvEspaciadoIzquierdo, tvLog1, tvLog2;
+    private TextView tvTurno,tvEspaciadoDerecho, tvEspaciadoIzquierdo, tvLogJ1, tvLogJ2;
     private TextView tvDado, tvMoneda,tvLog, tvNombreJ1, tvNombreJ2;
     private boolean simulando, borro, interrumpo;
     private boolean mostrarDialogGanador = true;
@@ -218,6 +217,7 @@ public class PartidaFragment extends Fragment {
 //    }
 
     private void verificaNuevoJuego (boolean savedInstance ) {
+        String nombreGanador;
         if (numeroJuego >1 && savedInstance) {
             int numeroJuegoAnt = numeroJuego;
             String ganadorJuegoAnt = ganadorJuego;
@@ -279,10 +279,22 @@ public class PartidaFragment extends Fragment {
                         }
                     }
                 };
+                switch (ganadorJuego) {
+                    case "1":
+                        nombreGanador = nombrej1;
+                        break;
+                    case "2":
+                        nombreGanador = nombrej2;
+                        break;
+                    default:
+                        nombreGanador = nombrej1;
+                        break;
+                }
                 if (mostrarDialogGanador) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getString(R.string.dialogo_texto_fin_juego) + " " + (numeroJuego+1) + "?")
-                            .setTitle(getString(R.string.dialogo_titulo_fin_juego) + ganadorJuego + "!!! ")
+                            .setTitle(getString(R.string.dialogo_titulo_fin_juego) + " "
+                                    + nombreGanador + "!!! ")
                             .setPositiveButton(R.string.boton_positivo_fin_juego, dialogClickListener)
                             .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
                             .show();
@@ -302,9 +314,20 @@ public class PartidaFragment extends Fragment {
                         }
                     }
                 };
+                switch (ganadorDuelo) {
+                    case "1":
+                        nombreGanador = nombrej1;
+                        break;
+                    case "2":
+                        nombreGanador = nombrej2;
+                        break;
+                    default:
+                        nombreGanador = nombrej1;
+                        break;
+                }
                 if (mostrarDialogGanador) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage(getString(R.string.dialogo_texto_fin_partida_p1) + " " + ganadorDuelo+ getString(R.string.dialogo_texto_fin_partida_p2))
+                    builder.setMessage(getString(R.string.dialogo_texto_fin_partida_p1) + " " + nombreGanador + getString(R.string.dialogo_texto_fin_partida_p2))
                             .setPositiveButton("Si", dialogClickListener)
                             .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener).show();
                 }
@@ -404,8 +427,8 @@ public class PartidaFragment extends Fragment {
             interrumpo = true;
             segundosContenedor = 0;
         }
-        tvLog1.setText(".\n.\n.");
-        tvLog2.setText(".\n.\n.");
+        tvLogJ1.setText(".\n.\n.");
+        tvLogJ2.setText(".\n.\n.");
         turno=1;
         tvTurno.setText("T:1");
         if (numeroJuego == 1) {
@@ -447,8 +470,8 @@ public class PartidaFragment extends Fragment {
         tempoInicial = Integer.parseInt(prefs.getString(getString(R.string.pref_key_tiempo_contador),getString(R.string.pref_default_tiempo_contador)));
         tempoInicial = tempoInicial*60;
         totalJuegos = 3;
-        tvLog1.setText(".\n.\n.");
-        tvLog2.setText(".\n.\n.");
+        tvLogJ1.setText(".\n.\n.");
+        tvLogJ2.setText(".\n.\n.");
         cantidadJugadores = 2;
         ganadorJuego = "0";
         ganadorDuelo = "0";
@@ -756,8 +779,8 @@ private void crearThread() {
         tvValorAOperar = (TextView) (rootView.findViewById(R.id.tvValorOperado));
         tvContador1 = (TextView) (rootView.findViewById(R.id.contador1));
         tvContador2 = (TextView) (rootView.findViewById(R.id.contador2));
-        tvLog1 = (TextView) (rootView.findViewById(R.id.tvLog1));
-        tvLog2 = (TextView) (rootView.findViewById(R.id.tvLog2));
+        tvLogJ1 = (TextView) (rootView.findViewById(R.id.tvLog1));
+        tvLogJ2 = (TextView) (rootView.findViewById(R.id.tvLog2));
 //        btnSimulacion = (Button) rootView.findViewById(R.id.btnSimulacion);
 //        btnFinSimulacion = (Button) rootView.findViewById(R.id.btnFinSimulacion);
 //        btnAplicaSimulacion = (Button) rootView.findViewById(R.id.btnAplicaSimulacion);
@@ -1573,41 +1596,60 @@ private void crearThread() {
     }
 
     public void generarLogPrincipal() {
+        String  strLogTempVN, strLogTempVO,
+                strTagMenosInicio, strTagMenosFin, strTagMasInicio, strTagMasFin,
+                strTagPuntajeInicio, strTagPuntajeFin;
         JSONArray datosPartidaArray;
         String strLogJ1 = "";
         String strLogJ2 = "";
-        String strLogTemp;
         JSONObject tmp;
+        strTagMenosInicio = "<small><small><small><font color= '#9a0707'>";
+        strTagMenosFin = "</font></small></small></small>&nbsp";
+        strTagMasInicio = "<small><small><small><font color= '#226f45'>";
+        strTagMasFin = "</font></small></small></small>&nbsp";
+        strTagPuntajeInicio = "<strike><font color= '#757575'>";
+        strTagPuntajeFin = "</font></strike><br/>";
+        MyHtmlTagHandler myHtmlHandler = new MyHtmlTagHandler();
         int c1=0, c2 = 0;
         try {
             datosPartidaArray = datosPartida;
             int fin = posicionArrayActual;
 
             for (int i = 0; i < fin; i++) {
+
                 tmp = (JSONObject) datosPartidaArray.get(i);
+                strLogTempVO = tmp.getString("operador") + tmp.getString("valor_operado");
+                switch (tmp.getString("operador")) {
+                    case "-":
+                        strLogTempVO = strTagMenosInicio + strLogTempVO + strTagMenosFin;
+                        break;
+                    case "+":
+                        strLogTempVO = strTagMasInicio + strLogTempVO + strTagMasFin;
+                }
                 if (!tmp.getString("operador").equals("t")) {
                     if (tmp.getString("operador").equals("d")) {
-                        strLogTemp =  getActivity().getString(R.string.texto_mensaje_empate);
+                        strLogTempVN =  getActivity().getString(R.string.texto_mensaje_empate);
                     } else {
-                        strLogTemp =  tmp.getString("valor_original")  ;
+                        strLogTempVN =  tmp.getString("valor_original")  ;
                     }
                     if (tmp.has("retirada")) {
                         if (tmp.getBoolean("retirada")) {
-                            strLogTemp = strLogTemp + getString(R.string.texto_log_retirada);
+                            strLogTempVN = strLogTempVN + getString(R.string.texto_log_retirada);
                         }
                     }
+                    strLogTempVN = strTagPuntajeInicio + strLogTempVN + strTagPuntajeFin;
                     switch (tmp.getInt("jugador") ) {
                         case 1:
-                            strLogJ1 = strLogTemp + "\n" + strLogJ1;
+                            strLogJ1 = strLogTempVO + strLogTempVN + strLogJ1;
                             c1++;
                             break;
                         case 2:
-                            strLogJ2 = strLogTemp + "\n" + strLogJ2;
+                            strLogJ2 = strLogTempVO + strLogTempVN +  strLogJ2;
                             c2++;
                             break;
                         case 0:
-                            strLogJ1 = strLogTemp + "\n" + strLogJ1;
-                            strLogJ2 = strLogTemp + "\n" + strLogJ2;
+                            strLogJ1 = strLogTempVN +  strLogJ1;
+                            strLogJ2 = strLogTempVN +  strLogJ2;
                             c1++;
                             c2++;
                         default:
@@ -1615,21 +1657,8 @@ private void crearThread() {
                     }
                 }
             }
-            SpannableString ssLogJ1 = new SpannableString(strLogJ1);
-            SpannableString ssLogJ2 = new SpannableString(strLogJ2);
-            if (c1 >= 1 ) {
-                ssLogJ1.setSpan(new StrikethroughSpan(),0,strLogJ1.length()-1,0);
-                tvLog1.setText(ssLogJ1);
-            } else {
-                tvLog1.setText(".\n.\n.");
-            }
-            if (c2 >= 1 && !strLogJ2.equals(tvContador2.getText())) {
-                ssLogJ2.setSpan(new StrikethroughSpan(), 0, strLogJ2.length() - 1, 0);
-                tvLog2.setText(ssLogJ2);
-            } else {
-                tvLog2.setText(".\n.\n.");
-            }
-
+            tvLogJ1.setText(Html.fromHtml(strLogJ1, null, myHtmlHandler));
+            tvLogJ2.setText(Html.fromHtml(strLogJ2, null, myHtmlHandler));
         } catch (JSONException e) {
             e.printStackTrace();
         }
