@@ -2,10 +2,31 @@
 
     <!-- Base application theme. -->
     <style name="ThemeLight" parent="Theme.AppCompat.Light">
-
     </style>
     <style name="MyActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:background">@color/fondo_contenedor_acciones</item>
+        <item name="background">@color/fondo_contenedor_acciones</item>
+        <item name="titleTextStyle">@style/MyActionBar.TitleTextStyle</item>
+    </style>
+
+    <style name="MyActionBar.TitleTextStyle" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/texto_botones_contenedor_acciones</item>
+    </style>
+
+    <style name="AppTheme"
+        parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/MyActionBar2</item>
+
+        <!-- Support library compatibility -->
+        <item name="actionBarStyle">@style/MyActionBar2</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="MyActionBar2"
+        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/fondo_contenedor_acciones</item>
+
+        <!-- Support library compatibility -->
+        <item name="background">@color/fondo_contenedor_acciones</item>
     </style>
 </resources>

@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
 import android.text.SpannableString;
 import android.text.style.StrikethroughSpan;
 import android.util.Log;
@@ -28,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -45,6 +47,10 @@ import java.util.concurrent.TimeUnit;
  * A Fragmento donde esta la partida.
  */
 public class PartidaFragment extends Fragment {
+    public static final String PREFERENCIAS_YCL = "PreferenciasYCL";
+    public static final String PREF_NOMBREJ1 = "PrefNombreJ1";
+    public static final String PREF_NOMBREJ2 = "PrefNombreJ2";
+
     private int posicionArrayActual, turno, nuevoTexto,cantidadJugadores, jugadorActual,
             contador1Simulacion, contador2Simulacion,contador1,contador2, valorTempo,
             tempoInicial, numeroJuego, valorInicial, totalJuegos,segundosContenedor;
@@ -52,20 +58,21 @@ public class PartidaFragment extends Fragment {
     private int estadoTempo; //-1 sin iniciar, 0 detenido, 1 contando
     private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador;
     private TextView tvTurno,tvEspaciadoDerecho, tvEspaciadoIzquierdo, tvLog1, tvLog2;
-    private TextView tvDado, tvMoneda,tvLog;
+    private TextView tvDado, tvMoneda,tvLog, tvNombreJ1, tvNombreJ2;
     private boolean simulando, borro, interrumpo;
     private boolean mostrarDialogGanador = true;
     private boolean mostrarDialogReinicio = false;
     private Button  btnSimulacion, btnFinSimulacion, btnAplicaSimulacion, btnRetirada, btnEmpate;
     private JSONArray datosPartida, partidaSimulacion, partida;
     private JSONObject duelo;
-    private ImageView ivJ1J1,ivJ1J2,ivJ1J3,ivJ2J1,ivJ2J2,ivJ2J3;
-    private String str,ganadorJuego, ganadorDuelo ;
+    private ImageView ivJ1J1,ivJ1J2,ivJ1J3,ivJ2J1,ivJ2J2,ivJ2J3, fondoContadorJ1, fondoContadorJ2;
+    private String str,ganadorJuego, ganadorDuelo,nombrej1,nombrej2 ;
     private LinearLayout contenedorGanados1, contenedorGanados2,contenedorNumeros,
             contenedorJugador1, contenedorJugador2;
     private Handler mHandler = new Handler();
     private Thread threadContenedorNumeros;
     private BroadcastReceiver contadorReceiver;
+    private SharedPreferences misPreferencias;
 
     public PartidaFragment() {
     }
@@ -104,7 +111,7 @@ public class PartidaFragment extends Fragment {
         }
     }
 
-    private void modificaFondo(int valor, TextView tvFondo) {
+    private void modificaFondo(int valor, ImageView tvFondo) {
         if (valor >= valorInicial) {
             tvFondo.setBackgroundResource(R.drawable.gradient_100);
         } else if (valor >= valorInicial*.9) {
@@ -318,8 +325,8 @@ public class PartidaFragment extends Fragment {
                         ivJ2J1.setImageResource(R.drawable.circulo_verde);
                         break;
                     case "d" :
-                        ivJ1J1.setImageResource(R.drawable.circulo_gris);
-                        ivJ2J1.setImageResource(R.drawable.circulo_gris);
+                        ivJ1J1.setImageResource(R.drawable.circulo_amarillo);
+                        ivJ2J1.setImageResource(R.drawable.circulo_amarillo);
                         break;
                     default:
                         break;
@@ -336,8 +343,8 @@ public class PartidaFragment extends Fragment {
                         ivJ2J2.setImageResource(R.drawable.circulo_verde);
                         break;
                     case "d" :
-                        ivJ1J2.setImageResource(R.drawable.circulo_gris);
-                        ivJ2J2.setImageResource(R.drawable.circulo_gris);
+                        ivJ1J2.setImageResource(R.drawable.circulo_amarillo);
+                        ivJ2J2.setImageResource(R.drawable.circulo_amarillo);
                         break;
                     default:
                         break;
@@ -354,8 +361,8 @@ public class PartidaFragment extends Fragment {
                         ivJ2J3.setImageResource(R.drawable.circulo_verde);
                         break;
                     case "d" :
-                        ivJ1J3.setImageResource(R.drawable.circulo_gris);
-                        ivJ2J3.setImageResource(R.drawable.circulo_gris);
+                        ivJ1J3.setImageResource(R.drawable.circulo_amarillo);
+                        ivJ2J3.setImageResource(R.drawable.circulo_amarillo);
                         break;
                     default:
                         break;
@@ -388,9 +395,9 @@ public class PartidaFragment extends Fragment {
         mostrarDialogGanador = true;
         mostrarDialogReinicio = false;
         tvContador1.setText(Integer.toString(contador1));
-        tvContador1.setBackgroundResource(R.drawable.gradient_100);
+        fondoContadorJ1.setBackgroundResource(R.drawable.gradient_100);
         tvContador2.setText(Integer.toString(contador2));
-        tvContador2.setBackgroundResource(R.drawable.gradient_100);
+        fondoContadorJ2.setBackgroundResource(R.drawable.gradient_100);
         tvValorAOperar.setText("0");
         contenedorNumeros.setVisibility(View.GONE);
         if (!interrumpo) {
@@ -408,6 +415,10 @@ public class PartidaFragment extends Fragment {
         try {
             JSONArray tempPartida = new JSONArray();
             JSONObject partidaJSON = new JSONObject();
+            nombrej1 = misPreferencias.getString(PREF_NOMBREJ1,getActivity().getString(R.string.texto_nombre_jugador_defecto) + " 1");
+            nombrej2 = misPreferencias.getString(PREF_NOMBREJ2,getActivity().getString(R.string.texto_nombre_jugador_defecto) + " 2");
+            tvNombreJ1.setText(nombrej1);
+            tvNombreJ2.setText(nombrej2);
             partidaJSON.put("numeroJuego", Integer.toString(numeroJuego));
             partidaJSON.put("ganador", ganadorJuego );
             partidaJSON.put("datosPartida", datosPartida);
@@ -416,7 +427,10 @@ public class PartidaFragment extends Fragment {
             }
             partida = tempPartida;
             partida.put(partidaJSON);
-
+            duelo.put("duelo_id", "1");
+            duelo.put("cantidad_jugadores", cantidadJugadores);
+            duelo.put("nombrej1",nombrej1);
+            duelo.put("nombrej2",nombrej2);
             duelo.put("partida",partida);
             duelo.put("ganador", ganadorDuelo);
 
@@ -443,6 +457,7 @@ public class PartidaFragment extends Fragment {
         ladoNumeros = 0;
         partida = new JSONArray();
         JSONObject partidaJson  = new JSONObject();
+
         try {
                 /*pongos los datos de la partida en un json */
             partidaJson.put("numeroJuego", Integer.toString(numeroJuego));
@@ -451,8 +466,6 @@ public class PartidaFragment extends Fragment {
             partida.put(partidaJson);
 
                 /*Datos del duelo */
-            duelo.put("duelo_id", "1");
-            duelo.put("cantidad_jugadores", cantidadJugadores);
             duelo.put("ganador", ganadorDuelo);
             duelo.put("ubicacion_id", "1");
             duelo.put("partida",partida);
@@ -529,6 +542,8 @@ public class PartidaFragment extends Fragment {
 
             duelo.put("partida", partida);
             duelo.put("ganador", ganadorDuelo);
+            duelo.put("nombrej1",nombrej1 );
+            duelo.put("nombrej2",nombrej2 );
 
 
         } catch (JSONException e) {
@@ -591,8 +606,9 @@ private void crearThread() {
     });
 }
 
-    private JSONObject calculaValor(int valorContador, int valorAOperar, String sumaOResta, String jugador, TextView textView) {
+    private JSONObject calculaValor(int valorContador, int valorAOperar, String sumaOResta, String jugador, TextView textView, ImageView fondoContador) {
         //Si suma es 0 si resta es 1, en caso que reste multiplicar el valor por -1
+        Log.v("TextSizeCalculaValor", "valor: " + textView.getTextSize());
         if (valorContador > 0  || !sumaOResta.equals("-")) {
             int nuevoValor;
             if (sumaOResta.equals("-")) {
@@ -619,7 +635,7 @@ private void crearThread() {
             }
             nuevoTexto = 0;
             animarContador(valorContador, nuevoValor, textView);
-            modificaFondo(nuevoValor, textView);
+            modificaFondo(nuevoValor, fondoContador);
             JSONObject movimiento = new JSONObject();
             try {
                 SimpleDateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa");
@@ -736,6 +752,7 @@ private void crearThread() {
         };
         segundosContenedor = 0;
         interrumpo = false;
+        misPreferencias = getActivity().getSharedPreferences(PREFERENCIAS_YCL,Context.MODE_PRIVATE);
         tvValorAOperar = (TextView) (rootView.findViewById(R.id.tvValorOperado));
         tvContador1 = (TextView) (rootView.findViewById(R.id.contador1));
         tvContador2 = (TextView) (rootView.findViewById(R.id.contador2));
@@ -752,6 +769,8 @@ private void crearThread() {
         tvLog = (TextView) rootView.findViewById(R.id.tvLog);
         tvEspaciadoDerecho = (TextView) rootView.findViewById(R.id.espaciadoDerecho);
         tvEspaciadoIzquierdo = (TextView) rootView.findViewById(R.id.espaciadoIzquierdo);
+        tvNombreJ1 = (TextView) rootView.findViewById(R.id.tvNombreJ1);
+        tvNombreJ2 = (TextView) rootView.findViewById(R.id.tvNombreJ2);
         estadoTempo = -1;
         ivJ1J1 = (ImageView) rootView.findViewById(R.id.ivJ1J1);
         ivJ1J2 = (ImageView) rootView.findViewById(R.id.ivJ1J2);
@@ -764,7 +783,23 @@ private void crearThread() {
         contenedorNumeros = (LinearLayout) rootView.findViewById(R.id.contenedorNumeros);
         contenedorJugador1 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador1);
         contenedorJugador2 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador2);
+        fondoContadorJ1 = (ImageView) rootView.findViewById(R.id.fondoContadorJ1);
+        fondoContadorJ2 = (ImageView) rootView.findViewById(R.id.fondoContadorJ2);
         contenedorNumeros.setVisibility(View.GONE);
+        tvNombreJ1.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                alertaModificarNombre(1);
+                return true;
+            }
+        });
+        tvNombreJ2.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                alertaModificarNombre(2);
+                return true;
+            }
+        });
         tvEspaciadoDerecho.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -853,10 +888,10 @@ private void crearThread() {
                 cantidadJugadores = savedInstanceState.getInt("sCantidadJugadores");
                 contador1 = savedInstanceState.getInt("sContador1");
                 tvContador1.setText(Integer.toString(contador1));
-                modificaFondo(contador1, tvContador1);
+                modificaFondo(contador1, fondoContadorJ1);
                 contador2 = savedInstanceState.getInt("sContador2");
                 tvContador2.setText(Integer.toString(contador2));
-                modificaFondo(contador2, tvContador2);
+                modificaFondo(contador2, fondoContadorJ2);
                 tvValorAOperar.setText(savedInstanceState.getString("sValorAOperar"));
                 estadoTempo = savedInstanceState.getInt("sEstadoTempo");
                 //Manejo de temporizador
@@ -917,19 +952,31 @@ private void crearThread() {
                 public void onClick(View v) {
                     int jugador;
                     TextView tvContador;
+                    ImageView fondoContador;
                     borro= false;
-                    if (ladoNumeros == 1) {
-                        jugador = 1;
-                        tvContador = tvContador1;
-                    } else {
-                        jugador = 2;
-                        tvContador = tvContador2;
+                    switch ( ladoNumeros) {
+                        case 1 :
+                            jugador = 1;
+                            tvContador = tvContador1;
+                            fondoContador = fondoContadorJ1;
+                            break;
+                        case 2 :
+                            jugador = 2;
+                            tvContador = tvContador2;
+                            fondoContador = fondoContadorJ2;
+                            break;
+                        default:
+                            jugador = 1;
+                            tvContador = tvContador1;
+                            fondoContador = fondoContadorJ1;
+                            break;
                     }
+
 
                     int valorAOperar = calculaValorAOperar(tvValorAOperar.getText().toString());
                     int valorContador = Integer.parseInt(tvContador.getText().toString());
                     if (valorAOperar != 0) {
-                        JSONObject temp = calculaValor(valorContador, valorAOperar, "+", Integer.toString(jugador), tvContador);
+                        JSONObject temp = calculaValor(valorContador, valorAOperar, "+", Integer.toString(jugador), tvContador, fondoContador);
                         if (temp != null) {
                             agregaMovimiento(temp);
                             generarLogPrincipal();
@@ -944,19 +991,30 @@ private void crearThread() {
                 public void onClick(View v) {
                     int jugador;
                     TextView tvContador;
-
-                    if (ladoNumeros == 1) {
-                        jugador = 1;
-                        tvContador = tvContador1;
-                    } else {
-                        jugador = 2;
-                        tvContador = tvContador2;
+                    ImageView fondoContador;
+                    switch ( ladoNumeros) {
+                        case 1 :
+                            jugador = 1;
+                            tvContador = tvContador1;
+                            fondoContador = fondoContadorJ1;
+                            break;
+                        case 2 :
+                            jugador = 2;
+                            tvContador = tvContador2;
+                            fondoContador = fondoContadorJ2;
+                            break;
+                        default:
+                            jugador = 1;
+                            tvContador = tvContador1;
+                            fondoContador = fondoContadorJ1;
+                            break;
                     }
+
                     int valorAOperar = calculaValorAOperar(tvValorAOperar.getText().toString());
                     int valorContador = Integer.parseInt(tvContador.getText().toString());
                     borro= false;
                     if (valorAOperar != 0) {
-                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador);
+                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador,fondoContador);
                         if (temp != null) {
                             agregaMovimiento(temp);
                             generarLogPrincipal();
@@ -970,20 +1028,31 @@ private void crearThread() {
             public void onClick(View v) {
                 int jugador,valorAOperar;
                 TextView tvContador;
-
-                if (ladoNumeros == 1) {
-                    jugador = 1;
-                    tvContador = tvContador1;
-                } else {
-                    jugador = 2;
-                    tvContador = tvContador2;
+                ImageView fondoContador;
+                switch ( ladoNumeros) {
+                    case 1 :
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                    case 2 :
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    default:
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
                 }
+
                 valorAOperar = calculaValorAOperar(tvContador.getText().toString());
                 int valorContador = Integer.parseInt(tvContador.getText().toString());
                 borro= false;
                 if (valorAOperar != 0) {
                     try {
-                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador);
+                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador,fondoContador);
                         if (temp != null) {
                             temp.put("retirada",true);
                             agregaMovimiento(temp);
@@ -1159,6 +1228,65 @@ private void crearThread() {
         return rootView;
     }
 
+    private void alertaModificarNombre(int gJugador) {
+        final int jugador = gJugador;
+        final EditText nombre =  new EditText(getActivity());
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String nuevoNombre = nombre.getText().toString();
+                SharedPreferences.Editor edit = misPreferencias.edit();
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        if (!nuevoNombre.equals("")) {
+                            switch (jugador) {
+                                case 1:
+                                    tvNombreJ1.setText(nuevoNombre);
+                                    nombrej1 = nuevoNombre;
+                                    edit.putString(PREF_NOMBREJ1, nuevoNombre);
+                                    edit.commit();
+                                    break;
+                                case 2 :
+                                    tvNombreJ2.setText(nuevoNombre);
+                                    nombrej2 = nuevoNombre;
+                                    edit.putString(PREF_NOMBREJ2, nuevoNombre);
+                                    edit.commit();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            modificarPartida();
+                        }
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
+        String tituloDialogoCambioNombre;
+        switch (jugador) {
+            case 1 :
+                tituloDialogoCambioNombre = getString(R.string.dialogo_titulo_cambio_nombre) + " " + nombrej1;
+                break;
+            case 2 :
+                tituloDialogoCambioNombre = getString(R.string.dialogo_titulo_cambio_nombre) + " " + nombrej2;
+                break;
+            default:
+                tituloDialogoCambioNombre = getString(R.string.dialogo_titulo_cambio_nombre);
+                break;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        nombre.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        nombre.setHint(getActivity().getString(R.string.texto_hint_nombre));
+        nombre.setPadding(40,20,20,20);
+        builder.setTitle(tituloDialogoCambioNombre)
+                .setView(nombre)
+                .setPositiveButton(R.string.boton_aceptar, dialogClickListener)
+                .setNegativeButton(R.string.boton_cancelar, dialogClickListener)
+                .show();
+    }
+
     private void mostrarContenedorNumeros( int lado) {
         if (ladoNumeros == 0) {
             ladoNumeros = lado;
@@ -1307,15 +1435,19 @@ private void crearThread() {
                 String operador = temp.getString("operador");
                 String jugador = temp.getString("jugador");
                 TextView tempTv;
+                ImageView fondoContador;
                 switch (jugador) {
                     case "1":
                         tempTv = tvContador1;
+                        fondoContador = fondoContadorJ1;
                         break;
                     case "2":
                         tempTv = tvContador2;
+                        fondoContador = fondoContadorJ2;
                         break;
                     default:
                         tempTv = tvContador1;
+                        fondoContador = fondoContadorJ1;
                         break;
                 }
                 int valorContador = Integer.parseInt(tempTv.getText().toString());
@@ -1327,11 +1459,11 @@ private void crearThread() {
                         break;
                     case "-" :
                         operador = "+";
-                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv,fondoContador);
                         break;
                     case "+" :
                         operador = "-";
-                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv,fondoContador);
                         break;
                     case "d" :
                         ganadorJuego = "0";
@@ -1368,15 +1500,19 @@ private void crearThread() {
                 String operador = temp.getString("operador");
                 String jugador = temp.getString("jugador");
                 TextView tempTv;
+                ImageView fondoContador;
                 switch (jugador) {
                     case "1":
                         tempTv = tvContador1;
+                        fondoContador = fondoContadorJ1;
                         break;
                     case "2":
                         tempTv = tvContador2;
+                        fondoContador = fondoContadorJ1;
                         break;
                     default:
                         tempTv = tvContador1;
+                        fondoContador = fondoContadorJ1;
                         break;
                 }
                 int valorContador;
@@ -1387,13 +1523,13 @@ private void crearThread() {
                         break;
                     case "+" :
                         valorContador = Integer.parseInt(tempTv.getText().toString());
-                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv,fondoContador);
                         mostrarDialogGanador = true;
                         verificaNuevoJuego(false);
                         break;
                     case "-" :
                         valorContador = Integer.parseInt(tempTv.getText().toString());
-                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv);
+                        calculaValor(valorContador, valorOperado, operador, jugador, tempTv,fondoContador);
                         mostrarDialogGanador = true;
                         verificaNuevoJuego(false);
                         break;

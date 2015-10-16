@@ -11,7 +11,7 @@ tools:context="hn.jepz.www.yugiohlifecounter.MonedaFragment">
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/ivCara"
-    android:src="@drawable/cruz"
+    android:src="@drawable/cruzl"
     android:layout_alignParentTop="true"
     android:layout_alignParentLeft="true"
     android:layout_alignParentStart="true"
@@ -22,7 +22,7 @@ tools:context="hn.jepz.www.yugiohlifecounter.MonedaFragment">
     android:layout_height="wrap_content"
     android:id="@+id/ivCruz"
     android:layout_below="@+id/ivCara"
-    android:src="@drawable/cara"
+    android:src="@drawable/caral"
     android:layout_centerHorizontal="true"
     android:layout_marginTop="93dp" />
 </RelativeLayout>

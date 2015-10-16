@@ -56,8 +56,8 @@ public class HistoriaAdapter extends android.support.v4.widget.CursorAdapter {
         TextView tvEncabezadoJ1 = (TextView) view.findViewById(R.id.tvEncabezadoJ1);
         TextView tvEncabezadoJ2 = (TextView) view.findViewById(R.id.tvEncabezadoJ2);
         TextView tvNumeroJuegoLog = (TextView) view.findViewById(R.id.tvNumeroJuegoLog);
-        strEncabezadoJ1 = context.getString(R.string.texto_nombre_jugador_defecto) + "1";
-        strEncabezadoJ2 = context.getString(R.string.texto_nombre_jugador_defecto) + "2";
+        strEncabezadoJ1 = cursor.getString(6);
+        strEncabezadoJ2 = cursor.getString(7);
         MyHtmlTagHandler myHtmlHandler = new MyHtmlTagHandler();
         tvNumeroJuegoLog.setText(strNumeroDuelo);
         tvEncabezadoJ1.setText(strEncabezadoJ1);
@@ -83,10 +83,12 @@ public class HistoriaAdapter extends android.support.v4.widget.CursorAdapter {
                 tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_verde,0,0,0);
                 break;
             case "d":
-                tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_gris,0,0,0);
-                tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_gris,0,0,0);
+                tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_amarillo,0,0,0);
+                tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_amarillo,0,0,0);
                 break;
             default:
+                tvEncabezadoJ1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_amarillo,0,0,0);
+                tvEncabezadoJ2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.circulo_amarillo,0,0,0);
                 break;
         }
 

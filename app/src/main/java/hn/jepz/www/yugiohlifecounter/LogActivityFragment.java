@@ -29,7 +29,8 @@ public class LogActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_log, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.listview_historia);
         String[] columnas = new String[] {
-                "_id", "numeroJuego","ganador","datosPartida", "valor_inicial","posicionArrayActual"
+                "_id", "numeroJuego","ganador","datosPartida", "valor_inicial",
+                "posicionArrayActual", "nombrej1", "nombrej2"
         };
 
         MatrixCursor matrixcursor = new MatrixCursor(columnas);
@@ -41,7 +42,8 @@ public class LogActivityFragment extends Fragment {
             Log.v("Duelo", "" + strDuelo);
             JSONObject joDuelo = new JSONObject(strDuelo);
             JSONArray jaPartida = joDuelo.getJSONArray("partida");
-
+            String nombrej1 = joDuelo.getString("nombrej1");
+            String nombrej2 = joDuelo.getString("nombrej2");
             for (int i = 0; i < jaPartida.length(); i++) {
                 JSONObject joPartida = (JSONObject) jaPartida.get(i);
                 String strDatosPartida = joPartida.getJSONArray("datosPartida").toString();
@@ -53,6 +55,7 @@ public class LogActivityFragment extends Fragment {
                 }
                 matrixcursor.addRow(new Object[]{
                         i+1, iNumeroJuego, strGanador, strDatosPartida, valorInicial,fin
+                        ,nombrej1,nombrej2
                 });
 
             }

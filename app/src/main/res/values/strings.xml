@@ -38,6 +38,10 @@
     <string name="texto_boton_retirada">Retirada</string>
     <string name="texto_boton_empate">Empate</string>
     <string name="texto_mensaje_empate">Empate</string>
+    <string name="texto_hint_nombre">Nombre...</string>
+    <string name="dialogo_titulo_cambio_nombre">Cambiar nombre de</string>
+    <string name="boton_aceptar">Aceptar</string>
+    <string name="boton_cancelar">Cancelar</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="title_activity_moneda">Lanzar Moneda</string>

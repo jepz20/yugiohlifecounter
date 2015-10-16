@@ -21,53 +21,77 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:id="@+id/contenedorJugador1"
-                android:orientation="vertical"
-                android:paddingRight="10dp">
+                android:orientation="vertical">
                 <RelativeLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="4">
-                    <TextView android:text="@string/contador1_texto"
+                    android:layout_weight="5">
+                    <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:id="@+id/contador1"
-                        android:gravity="center"
-                        android:textStyle="bold"
-                        android:textIsSelectable="false"
-                        android:background="@drawable/gradient_100"
-                        android:textSize="70sp"
-                        android:textColor="@color/texto_contador"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true" />
+                        android:id="@+id/fondoContadorJ1"
+                        android:background="@drawable/gradient_100"/>
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:id="@+id/contenedorGanados1"
-                        android:layout_alignParentTop="true"
-                        android:visibility="visible">
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:id="@+id/contenedorDatosJ1">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:id="@+id/ivJ1J1"
-                            android:layout_alignLeft="@+id/contador1"
-                            android:src="@drawable/circulo_gris" />
+                            android:id="@+id/contenedorGanados1"
+                            android:paddingTop="2dp"
+                            android:visibility="visible">
+                            <ImageView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:id="@+id/ivJ1J1"
+                                android:layout_alignLeft="@+id/contador1"
+                                android:src="@drawable/circulo_gris" />
 
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:id="@+id/ivJ1J2"
-                            android:src="@drawable/circulo_gris" />
+                            <ImageView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:id="@+id/ivJ1J2"
+                                android:src="@drawable/circulo_gris" />
 
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                            <ImageView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:id="@+id/ivJ1J3"
+                                android:src="@drawable/circulo_gris" />
+                        </LinearLayout>
+                        <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                            android:text="@string/contador1_texto"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="4"
+                            android:id="@+id/contador1"
+                            android:gravity="center"
+                            android:textStyle="bold"
+                            android:textIsSelectable="false"
+                            android:textSize="400sp"
+                            android:singleLine="true"
+                            android:textColor="@color/texto_contador"
+                            android:paddingLeft="5dp"
+                            android:paddingRight="5dp"/>
+                        <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:id="@+id/ivJ1J3"
-                            android:src="@drawable/circulo_gris" />
+                            android:id="@+id/tvNombreJ1"
+                            android:text="Jose"
+                            android:textSize="400sp"
+                            android:paddingLeft="5dp"
+                            android:textColor="@color/texto_contador"
+                            android:gravity="bottom" />
                     </LinearLayout>
                 </RelativeLayout>
+
                 <TextView
                     android:layout_width="fill_parent"
                     android:id="@+id/tvLog1"
@@ -84,51 +108,73 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:paddingLeft="10dp"
                 android:id="@+id/contenedorJugador2">
                 <RelativeLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="4">
-                    <TextView
-                        android:text="@string/contador2_texto"
+                    android:layout_weight="5">
+                    <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:id="@+id/contador2"
-                        android:textIsSelectable="false"
-                        android:gravity="center"
-                        android:layout_gravity="right"
-                        android:textStyle="bold"
-                        android:textColor="@color/texto_contador"
-                        android:background="@drawable/gradient_100"
-                        android:textSize="70sp" />
+                        android:id="@+id/fondoContadorJ2"
+                        android:background="@drawable/gradient_100"/>
                     <LinearLayout
-                        android:id="@+id/contenedorGanados2"
                         android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:visibility="visible"
-                        android:layout_gravity="right"
-                        >
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:id="@+id/contenedorDatosJ2"
+                        android:orientation="vertical">
+                        <LinearLayout
+                            android:id="@+id/contenedorGanados2"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:id="@+id/ivJ2J1"
-                            android:src="@drawable/circulo_gris" />
+                            android:visibility="visible"
+                            android:paddingTop="2dp"
+                            >
+                            <ImageView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:id="@+id/ivJ2J1"
+                                android:src="@drawable/circulo_gris" />
 
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:id="@+id/ivJ2J2"
-                            android:src="@drawable/circulo_gris" />
+                            <ImageView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:id="@+id/ivJ2J2"
+                                android:src="@drawable/circulo_gris" />
 
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                            <ImageView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:id="@+id/ivJ2J3"
+                                android:src="@drawable/circulo_gris" />
+                        </LinearLayout>
+                        <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                            android:text="@string/contador2_texto"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="4"
+                            android:id="@+id/contador2"
+                            android:textIsSelectable="false"
+                            android:gravity="center"
+                            android:textStyle="bold"
+                            android:textColor="@color/texto_contador"
+                            android:textSize="400sp"
+                            android:paddingLeft="5dp"
+                            android:paddingRight="5dp"/>
+                        <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:id="@+id/ivJ2J3"
-                            android:src="@drawable/circulo_gris" />
+                            android:id="@+id/tvNombreJ2"
+                            android:text="Palma"
+                            android:textSize="400sp"
+                            android:textColor="@color/texto_contador"
+                            android:paddingLeft="5dp"
+                            android:gravity="bottom"/>
                     </LinearLayout>
                 </RelativeLayout>
                 <TextView
@@ -163,8 +209,8 @@
                 android:text="T:1"
                 android:textSize="20sp"
                 android:textColor="@color/texto_botones_contenedor_acciones"
-                android:background="@drawable/boton_contenedor_acciones"
                 android:gravity="center"
+                android:background="@drawable/boton_contenedor_acciones"
                 android:id="@+id/turno" />
             <TextView
                 android:layout_width="0dp"
@@ -173,8 +219,8 @@
                 android:textSize="20sp"
                 android:gravity="center"
                 android:textColor="@color/texto_botones_contenedor_acciones"
-                android:background="@drawable/boton_contenedor_acciones"
                 android:id="@+id/tvTemporizador"
+                android:background="@drawable/boton_contenedor_acciones"
                 android:text="45:00"/>
             <RelativeLayout
                 android:layout_width="0dp"
@@ -259,7 +305,6 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingLeft="16dp"
                 android:background="@color/transparent"
                 android:layout_weight="1">
                 <LinearLayout
@@ -355,11 +400,11 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:background="@color/transparent"
-                >
+                android:background="@color/transparent">
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:minHeight="@dimen/abc_action_bar_default_height_material"
                     android:paddingLeft="@dimen/abc_button_padding_horizontal_material"
                     android:paddingRight="@dimen/abc_button_padding_horizontal_material">
@@ -367,7 +412,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="2"
                         android:layout_height="match_parent"
-                        android:gravity="end"
+                        android:gravity="end|center"
                         android:id="@+id/tvValorOperado"
                         android:background="@color/transparent"
                         android:textColor="@color/texto_botones_contenedor_numeros"
@@ -385,7 +430,8 @@
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
@@ -422,7 +468,8 @@
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
@@ -459,7 +506,8 @@
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
@@ -495,7 +543,8 @@
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:minHeight="@dimen/abc_action_bar_default_height_material">
                     <Button
                         android:layout_width="0dp"
@@ -534,9 +583,6 @@
 
 
         </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="55dp"/>
 
     </LinearLayout>
 </RelativeLayout>
