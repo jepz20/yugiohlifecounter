@@ -15,8 +15,8 @@ android {
         applicationId "hn.jepz.www.yugiohlifecounter"
         minSdkVersion 11
         targetSdkVersion 21
-        versionCode 3
-        versionName "0.2"
+        versionCode 4
+        versionName "0.5"
     }
     buildTypes {
         release {

@@ -95,20 +95,7 @@ public class PartidaFragment extends Fragment {
     }
 
     public void     manejarTemporizar () {
-        boolean primeraVezContador = misPreferencias.getBoolean(PREF_PRIMERA_VEZ_CONTADOR,true);
-        ViewTarget target = new ViewTarget(getActivity().findViewById(R.id.tvTemporizador));
-        if (primeraVezContador) {
-            new ShowcaseView.Builder(getActivity())
-                    .setTarget(target)
-                    .setContentTitle(getActivity().getString(R.string.titulo_ayuda_temporizador))
-                    .setContentText(getActivity().getString(R.string.descripcion_ayuda_temporizador))
-                    .setStyle(R.style.CustomShowcaseTheme)
-                    .hideOnTouchOutside()
-                    .build();
-            SharedPreferences.Editor edit = misPreferencias.edit();
-            edit.putBoolean(PREF_PRIMERA_VEZ_CONTADOR,false);
-            edit.commit();
-        }
+
         //Si esta contando cancelarlo
         if (estadoTempo == 1) {
             try {
@@ -1078,6 +1065,20 @@ private void crearThread() {
         tvTemporizador.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                boolean primeraVezContador = misPreferencias.getBoolean(PREF_PRIMERA_VEZ_CONTADOR,true);
+                ViewTarget target = new ViewTarget(getActivity().findViewById(R.id.tvTemporizador));
+                if (primeraVezContador) {
+                    new ShowcaseView.Builder(getActivity())
+                            .setTarget(target)
+                            .setContentTitle(getActivity().getString(R.string.titulo_ayuda_temporizador))
+                            .setContentText(getActivity().getString(R.string.descripcion_ayuda_temporizador))
+                            .setStyle(R.style.CustomShowcaseTheme)
+                            .hideOnTouchOutside()
+                            .build();
+                    SharedPreferences.Editor edit = misPreferencias.edit();
+                    edit.putBoolean(PREF_PRIMERA_VEZ_CONTADOR,false);
+                    edit.commit();
+                }
                 manejarTemporizar();
             }
         });
@@ -1645,10 +1646,13 @@ private void crearThread() {
                 }
             });
         }
-        ViewTarget target = new ViewTarget(rootView.findViewById(R.id.contador1));
 
         boolean primeraVez = misPreferencias.getBoolean(PREF_PRIMERA_VEZ,true);
         if (primeraVez) {
+            SharedPreferences.Editor edit = misPreferencias.edit();
+            edit.putBoolean(PREF_PRIMERA_VEZ,false);
+            edit.commit();
+            ViewTarget target = new ViewTarget(rootView.findViewById(R.id.contador1));
             new ShowcaseView.Builder(getActivity())
                     .setTarget(target)
                     .setContentTitle(getActivity().getString(R.string.titulo_ayuda_contenedor_numeros))
@@ -1656,9 +1660,6 @@ private void crearThread() {
                     .setStyle(R.style.CustomShowcaseTheme)
                     .hideOnTouchOutside()
                     .build();
-            SharedPreferences.Editor edit = misPreferencias.edit();
-            edit.putBoolean(PREF_PRIMERA_VEZ,false);
-            edit.commit();
         }
 
         return rootView;
