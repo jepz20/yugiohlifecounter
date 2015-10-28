@@ -1,5 +1,5 @@
 <resources>
-    <string name="title_activity_settings">Configuracion</string>
+    <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
 
@@ -8,11 +8,11 @@
 
 
     <string name="pref_key_valor_inicial">valor_inicial</string>
-    <string name="pref_title_valor_inicial">Valor Inicial</string>
+    <string name="pref_title_valor_inicial">Initial Value</string>
     <string name="pref_default_valor_inicial">8000</string>
 
-    <string name="pref_key_tiempo_contador">tiempo_contador</string>
-    <string name="pref_title_tiempo_contador">Tiempo Contador(Minutos)</string>
+    <string name="pref_key_tiempo_contador">Counter Time</string>
+    <string name="pref_title_tiempo_contador">Counter Time (Minutes)</string>
     <string name="pref_default_tiempo_contador">40</string>
 
     <!-- Example settings for Data & Sync -->

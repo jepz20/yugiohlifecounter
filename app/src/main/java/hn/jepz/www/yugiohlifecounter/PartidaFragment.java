@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,12 +28,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +56,9 @@ public class PartidaFragment extends Fragment {
     public static final String PREFERENCIAS_YCL = "PreferenciasYCL";
     public static final String PREF_NOMBREJ1 = "PrefNombreJ1";
     public static final String PREF_NOMBREJ2 = "PrefNombreJ2";
+    public static final String PREF_PRIMERA_VEZ = "PrimeraVez";
+    public static final String PREF_PRIMERA_VEZ_NOMBRE = "PrimeraVezNombre";
+    public static final String PREF_PRIMERA_VEZ_CONTADOR = "PrimeraVezContador";
 
     private int posicionArrayActual, turno, nuevoTexto,cantidadJugadores, jugadorActual,
             contador1Simulacion, contador2Simulacion,contador1,contador2, valorTempo,
@@ -56,27 +66,49 @@ public class PartidaFragment extends Fragment {
     private int ladoNumeros; //0 ningun lado, 1 jugador1, 2 jugador2 etc..
     private int estadoTempo; //-1 sin iniciar, 0 detenido, 1 contando
     private TextView tvValorAOperar,tvContador1, tvContador2, tvTemp,tvTemporizador;
-    private TextView tvTurno,tvEspaciadoDerecho, tvEspaciadoIzquierdo, tvLogJ1, tvLogJ2;
+    private TextView tvTurno, tvLogJ1, tvLogJ2;
     private TextView tvDado, tvMoneda,tvLog, tvNombreJ1, tvNombreJ2;
     private boolean simulando, borro, interrumpo;
     private boolean mostrarDialogGanador = true;
     private boolean mostrarDialogReinicio = false;
-    private Button  btnSimulacion, btnFinSimulacion, btnAplicaSimulacion, btnRetirada, btnEmpate;
+    private boolean mostrarDialogCambioNombreJ1 = false;
+    private boolean mostrarDialogCambioNombreJ2 = false;
+    private Button  btnSimulacion, btnFinSimulacion, btnAplicaSimulacion, btnRetiradaL1,
+        btnEmpateL1, btnEmpateL2, btnRetiradaL2;
+    private ImageButton ibtnEditNombreJ1,ibtnEditNombreJ2,ibtnEditNombreJ3,ibtnEditNombreJ4 ;
     private JSONArray datosPartida, partidaSimulacion, partida;
     private JSONObject duelo;
     private ImageView ivJ1J1,ivJ1J2,ivJ1J3,ivJ2J1,ivJ2J2,ivJ2J3, fondoContadorJ1, fondoContadorJ2;
     private String str,ganadorJuego, ganadorDuelo,nombrej1,nombrej2 ;
+    private String strLogVacio = ".\n.\n.";
     private LinearLayout contenedorGanados1, contenedorGanados2,contenedorNumeros,
-            contenedorJugador1, contenedorJugador2;
+            contenedorJugador1, contenedorJugador2, llLado1, llLado2;
+    private RelativeLayout tvEspacioJ1, tvEspacioJ2, tvEspacioJ3, tvEspacioJ4;
+    ;
     private Handler mHandler = new Handler();
     private Thread threadContenedorNumeros;
     private BroadcastReceiver contadorReceiver;
     private SharedPreferences misPreferencias;
+    private ScrollView svLogJ1, svLogJ2;
 
     public PartidaFragment() {
     }
 
     public void     manejarTemporizar () {
+        boolean primeraVezContador = misPreferencias.getBoolean(PREF_PRIMERA_VEZ_CONTADOR,true);
+        ViewTarget target = new ViewTarget(getActivity().findViewById(R.id.tvTemporizador));
+        if (primeraVezContador) {
+            new ShowcaseView.Builder(getActivity())
+                    .setTarget(target)
+                    .setContentTitle(getActivity().getString(R.string.titulo_ayuda_temporizador))
+                    .setContentText(getActivity().getString(R.string.descripcion_ayuda_temporizador))
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .hideOnTouchOutside()
+                    .build();
+            SharedPreferences.Editor edit = misPreferencias.edit();
+            edit.putBoolean(PREF_PRIMERA_VEZ_CONTADOR,false);
+            edit.commit();
+        }
         //Si esta contando cancelarlo
         if (estadoTempo == 1) {
             try {
@@ -262,7 +294,7 @@ public class PartidaFragment extends Fragment {
                     }
                 }
             }
-            if (ganadorDuelo.equals("0")) {
+            if (ganadorDuelo.equals("0") && numeroJuego < totalJuegos) {
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -274,6 +306,9 @@ public class PartidaFragment extends Fragment {
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
+                                if (ultimoMovimientoEmpate()) {
+                                    actionUndo();
+                                }
                                 mostrarDialogGanador = false;
                                 break;
                         }
@@ -291,15 +326,27 @@ public class PartidaFragment extends Fragment {
                         break;
                 }
                 if (mostrarDialogGanador) {
+                    if (ladoNumeros != 0) {
+                        mostrarContenedorNumeros(ladoNumeros);
+                    }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getString(R.string.dialogo_texto_fin_juego) + " " + (numeroJuego+1) + "?")
                             .setTitle(getString(R.string.dialogo_titulo_fin_juego) + " "
                                     + nombreGanador + "!!! ")
                             .setPositiveButton(R.string.boton_positivo_fin_juego, dialogClickListener)
                             .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
+                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    if (ultimoMovimientoEmpate()) {
+                                        actionUndo();
+                                    }
+                                    mostrarDialogGanador = false;
+                                }
+                            })
                             .show();
                 }
-            } else {
+            } else if ( ganadorDuelo.equals("0") && numeroJuego >= totalJuegos){
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -309,6 +356,47 @@ public class PartidaFragment extends Fragment {
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
+                                if (ultimoMovimientoEmpate()) {
+                                    actionUndo();
+                                }
+                                mostrarDialogGanador = false;
+                                break;
+                        }
+                    }
+                };
+                if (mostrarDialogGanador) {
+                    if (ladoNumeros != 0) {
+                        mostrarContenedorNumeros(ladoNumeros);
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(getString(R.string.dialogo_texto_fin_partida_p1_empate) + " " + getString(R.string.dialogo_texto_fin_partida_p2))
+                            .setPositiveButton("Si", dialogClickListener)
+                            .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
+                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    if (ultimoMovimientoEmpate()) {
+                                        actionUndo();
+                                    }
+                                    mostrarDialogGanador = false;
+                                }
+                            })
+                            .show();
+                }
+            }
+            else {
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                reiniciarPartida();
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                if (ultimoMovimientoEmpate()) {
+                                    actionUndo();
+                                }
                                 mostrarDialogGanador = false;
                                 break;
                         }
@@ -326,10 +414,23 @@ public class PartidaFragment extends Fragment {
                         break;
                 }
                 if (mostrarDialogGanador) {
+                    if (ladoNumeros != 0) {
+                        mostrarContenedorNumeros(ladoNumeros);
+                    }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getString(R.string.dialogo_texto_fin_partida_p1) + " " + nombreGanador + getString(R.string.dialogo_texto_fin_partida_p2))
                             .setPositiveButton("Si", dialogClickListener)
-                            .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener).show();
+                            .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
+                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    if (ultimoMovimientoEmpate()) {
+                                        actionUndo();
+                                    }
+                                    mostrarDialogGanador = false;
+                                }
+                            })
+                            .show();
                 }
             }
         }
@@ -408,6 +509,15 @@ public class PartidaFragment extends Fragment {
     }
 
     private void empezarNuevoJuego(int gNumeroJuego) {
+        if (numeroJuego <= 1) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Log.v("EmpezarNuevoJuego",numeroJuego + " " + prefs.getString(getString(R.string.pref_key_valor_inicial),getString(R.string.pref_default_valor_inicial)));
+            valorInicial = Integer.parseInt(prefs.getString(getString(R.string.pref_key_valor_inicial),getString(R.string.pref_default_valor_inicial)));
+            tempoInicial = Integer.parseInt(prefs.getString(getString(R.string.pref_key_tiempo_contador),getString(R.string.pref_default_tiempo_contador)));
+            tempoInicial = tempoInicial*60;
+            reiniciarTemporizador();
+//            duelo = new JSONObject();
+        }
         datosPartida = new JSONArray();
         posicionArrayActual = -1;
         numeroJuego = gNumeroJuego;
@@ -417,6 +527,8 @@ public class PartidaFragment extends Fragment {
         ganadorJuego = "0";
         mostrarDialogGanador = true;
         mostrarDialogReinicio = false;
+        mostrarDialogCambioNombreJ1 = false;
+        mostrarDialogCambioNombreJ2 = false;
         tvContador1.setText(Integer.toString(contador1));
         fondoContadorJ1.setBackgroundResource(R.drawable.gradient_100);
         tvContador2.setText(Integer.toString(contador2));
@@ -427,14 +539,11 @@ public class PartidaFragment extends Fragment {
             interrumpo = true;
             segundosContenedor = 0;
         }
-        tvLogJ1.setText(".\n.\n.");
-        tvLogJ2.setText(".\n.\n.");
+
+        tvLogJ1.setText(strLogVacio);
+        tvLogJ2.setText(strLogVacio);
         turno=1;
         tvTurno.setText("T:1");
-        if (numeroJuego == 1) {
-            reiniciarTemporizador();
-//            duelo = new JSONObject();
-        }
         try {
             JSONArray tempPartida = new JSONArray();
             JSONObject partidaJSON = new JSONObject();
@@ -470,8 +579,8 @@ public class PartidaFragment extends Fragment {
         tempoInicial = Integer.parseInt(prefs.getString(getString(R.string.pref_key_tiempo_contador),getString(R.string.pref_default_tiempo_contador)));
         tempoInicial = tempoInicial*60;
         totalJuegos = 3;
-        tvLogJ1.setText(".\n.\n.");
-        tvLogJ2.setText(".\n.\n.");
+        tvLogJ1.setText(strLogVacio);
+        tvLogJ2.setText(strLogVacio);
         cantidadJugadores = 2;
         ganadorJuego = "0";
         ganadorDuelo = "0";
@@ -764,7 +873,6 @@ private void crearThread() {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         tvTemporizador = (TextView) rootView.findViewById(R.id.tvTemporizador);
         contadorReceiver = new BroadcastReceiver() {
@@ -784,14 +892,25 @@ private void crearThread() {
 //        btnSimulacion = (Button) rootView.findViewById(R.id.btnSimulacion);
 //        btnFinSimulacion = (Button) rootView.findViewById(R.id.btnFinSimulacion);
 //        btnAplicaSimulacion = (Button) rootView.findViewById(R.id.btnAplicaSimulacion);
-        btnRetirada = (Button) rootView.findViewById(R.id.btnRetirada);
-        btnEmpate = (Button) rootView.findViewById(R.id.btnEmpate);
+        btnRetiradaL1 = (Button) rootView.findViewById(R.id.btnRetiradaL1);
+        btnRetiradaL2 = (Button) rootView.findViewById(R.id.btnRetiradaL2);
+        btnEmpateL1 = (Button) rootView.findViewById(R.id.btnEmpateL1);
+        btnEmpateL2 = (Button) rootView.findViewById(R.id.btnEmpateL2);
+        ibtnEditNombreJ1 = (ImageButton) rootView.findViewById(R.id.ibtnEditNombreJ1);
+        ibtnEditNombreJ2 = (ImageButton) rootView.findViewById(R.id.ibtnEditNombreJ2);
+        ibtnEditNombreJ3 = (ImageButton) rootView.findViewById(R.id.ibtnEditNombreJ3);
+        ibtnEditNombreJ4 = (ImageButton) rootView.findViewById(R.id.ibtnEditNombreJ4);
+        llLado1 = (LinearLayout) rootView.findViewById(R.id.llLado1);
+        llLado2 = (LinearLayout) rootView.findViewById(R.id.llLado2);
         tvTurno = (TextView) rootView.findViewById(R.id.turno);
         tvDado = (TextView) rootView.findViewById(R.id.tvDado);
         tvMoneda = (TextView) rootView.findViewById(R.id.tvMoneda);
         tvLog = (TextView) rootView.findViewById(R.id.tvLog);
-        tvEspaciadoDerecho = (TextView) rootView.findViewById(R.id.espaciadoDerecho);
-        tvEspaciadoIzquierdo = (TextView) rootView.findViewById(R.id.espaciadoIzquierdo);
+
+        tvEspacioJ1 = (RelativeLayout) rootView.findViewById(R.id.espacioJ1);
+        tvEspacioJ2 = (RelativeLayout) rootView.findViewById(R.id.espacioJ2);
+        tvEspacioJ3 = (RelativeLayout) rootView.findViewById(R.id.espacioJ3);
+        tvEspacioJ4 = (RelativeLayout) rootView.findViewById(R.id.espacioJ4);
         tvNombreJ1 = (TextView) rootView.findViewById(R.id.tvNombreJ1);
         tvNombreJ2 = (TextView) rootView.findViewById(R.id.tvNombreJ2);
         estadoTempo = -1;
@@ -805,33 +924,125 @@ private void crearThread() {
         contenedorGanados2 = (LinearLayout) rootView.findViewById(R.id.contenedorGanados2);
         contenedorNumeros = (LinearLayout) rootView.findViewById(R.id.contenedorNumeros);
         contenedorJugador1 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador1);
-        contenedorJugador2 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador2);
+        if (rootView.findViewById(R.id.contenedorJugador2) != null) {
+            contenedorJugador2 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador2);
+
+        } else {
+            contenedorJugador2 = (LinearLayout) rootView.findViewById(R.id.contenedorJugador3);
+        }
+
         fondoContadorJ1 = (ImageView) rootView.findViewById(R.id.fondoContadorJ1);
         fondoContadorJ2 = (ImageView) rootView.findViewById(R.id.fondoContadorJ2);
         contenedorNumeros.setVisibility(View.GONE);
+        //Para que muestre el contenedor de numeros
+        tvLogJ1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v("svLogJ1", "Click");
+                mostrarContenedorNumeros(1);
+            }
+        });
+        //Para que muestre el contenedor de numeros
+        tvLogJ2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v("svLogJ2", "Click");
+                if (rootView.findViewById(R.id.contenedorJugador2) != null) {
+                    mostrarContenedorNumeros(2);
+
+                } else {
+                    mostrarContenedorNumeros(3);
+                }
+            }
+        });
+        //Para que muestre el contenedor de numeros
+        tvNombreJ1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mostrarContenedorNumeros(1);
+            }
+        });
+         //Para cambiar el nombre
         tvNombreJ1.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                mostrarDialogCambioNombreJ1 = true;
                 alertaModificarNombre(1);
                 return true;
             }
         });
+        ibtnEditNombreJ1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mostrarDialogCambioNombreJ1 = true;
+                alertaModificarNombre(1);
+            }
+        });
+        //Para cambiar el nombre
         tvNombreJ2.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                mostrarDialogCambioNombreJ2 = true;
                 alertaModificarNombre(2);
                 return true;
             }
         });
-        tvEspaciadoDerecho.setOnClickListener(new View.OnClickListener() {
+        ibtnEditNombreJ2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mostrarDialogCambioNombreJ2 = true;
+                alertaModificarNombre(2);
+            }
+        });
+        ibtnEditNombreJ3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mostrarDialogCambioNombreJ2 = true;
+                if (rootView.findViewById(R.id.contenedorJugador2) != null) {
+                    alertaModificarNombre(2);
+
+                } else {
+                    alertaModificarNombre(2);
+                }
+            }
+        });
+        //Para que muestre el contenedor de numeros
+        tvNombreJ2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (rootView.findViewById(R.id.contenedorJugador2) != null) {
+                    mostrarContenedorNumeros(2);
+
+                } else {
+                    mostrarContenedorNumeros(3);
+                }
+            }
+        });
+        tvEspacioJ1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v("tvEspacioJ1", "Hice Click en J1");
+                mostrarContenedorNumeros(1);
+            }
+        });
+        tvEspacioJ2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v("tvEspacioJ2", "Hice Click en J2");
                 mostrarContenedorNumeros(2);
             }
         });
-        tvEspaciadoIzquierdo.setOnClickListener(new View.OnClickListener() {
+        tvEspacioJ3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.v("tvEspacioJ3", "Hice Click en J3");
+                mostrarContenedorNumeros(3);
+            }
+        });
+        tvEspacioJ4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v("tvEspacioJ4", "Hice Click en J4");
                 mostrarContenedorNumeros(1);
             }
         });
@@ -844,19 +1055,19 @@ private void crearThread() {
         contenedorJugador1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                params2.addRule(RelativeLayout.CENTER_VERTICAL);
                 mostrarContenedorNumeros(1);
             }
         });
         contenedorJugador2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params2.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                params2.addRule(RelativeLayout.CENTER_VERTICAL);
-                mostrarContenedorNumeros(2);
+                if (rootView.findViewById(R.id.contenedorJugador2) != null) {
+                    mostrarContenedorNumeros(2);
+
+                } else {
+                    mostrarContenedorNumeros(3);
+                }
+
             }
         });
 
@@ -905,6 +1116,15 @@ private void crearThread() {
                 if (savedInstanceState.getString("sDuelo").length() != 0 ) {
                     duelo= new JSONObject(savedInstanceState.getString("sDuelo"));
                 }
+
+                mostrarDialogCambioNombreJ1 = savedInstanceState.getBoolean("sMostrarDialogCambioNombreJ1");
+                if (mostrarDialogCambioNombreJ1) {
+                    alertaModificarNombre(1);
+                }
+                mostrarDialogCambioNombreJ2 = savedInstanceState.getBoolean("sMostrarDialogCambioNombreJ2");
+                if (mostrarDialogCambioNombreJ2) {
+                    alertaModificarNombre(2);
+                }
                 posicionArrayActual = savedInstanceState.getInt("sPosicionArrayActual");
                 turno = savedInstanceState.getInt("sTurno");
                 valorInicial = savedInstanceState.getInt("sValorInicial");
@@ -931,6 +1151,7 @@ private void crearThread() {
                 manejarTemporizar();
                 //Generar log Principal
                 generarLogPrincipal();
+                //Si cambio la preferencia reinicio todo
 
 //                simulando = savedInstanceState.getBoolean("sSimulando");
 //                if (simulando) {
@@ -968,22 +1189,27 @@ private void crearThread() {
 
         //Inicializa los botones de suma
 
-            Button btnSuma = (Button) rootView.findViewById(R.id.suma1);
+            Button btnSumaL1 = (Button) rootView.findViewById(R.id.suma1L1);
 
-            btnSuma.setOnClickListener(new View.OnClickListener() {
+            btnSumaL1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int jugador;
                     TextView tvContador;
                     ImageView fondoContador;
-                    borro= false;
-                    switch ( ladoNumeros) {
-                        case 1 :
+                    borro = false;
+                    switch (ladoNumeros) {
+                        case 1:
                             jugador = 1;
                             tvContador = tvContador1;
                             fondoContador = fondoContadorJ1;
                             break;
-                        case 2 :
+                        case 2:
+                            jugador = 2;
+                            tvContador = tvContador2;
+                            fondoContador = fondoContadorJ2;
+                            break;
+                        case 3:
                             jugador = 2;
                             tvContador = tvContador2;
                             fondoContador = fondoContadorJ2;
@@ -1007,9 +1233,9 @@ private void crearThread() {
                     }
                 }
             });
-            Button btnResta = (Button) rootView.findViewById(R.id.resta1);
+            Button btnRestaL1 = (Button) rootView.findViewById(R.id.resta1L1);
 
-            btnResta.setOnClickListener(new View.OnClickListener() {
+            btnRestaL1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int jugador;
@@ -1022,6 +1248,11 @@ private void crearThread() {
                             fondoContador = fondoContadorJ1;
                             break;
                         case 2 :
+                            jugador = 2;
+                            tvContador = tvContador2;
+                            fondoContador = fondoContadorJ2;
+                            break;
+                        case 3:
                             jugador = 2;
                             tvContador = tvContador2;
                             fondoContador = fondoContadorJ2;
@@ -1046,19 +1277,24 @@ private void crearThread() {
                 }
             });
 
-        btnRetirada.setOnClickListener(new View.OnClickListener() {
+        btnRetiradaL1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int jugador,valorAOperar;
+                int jugador, valorAOperar;
                 TextView tvContador;
                 ImageView fondoContador;
-                switch ( ladoNumeros) {
-                    case 1 :
+                switch (ladoNumeros) {
+                    case 1:
                         jugador = 1;
                         tvContador = tvContador1;
                         fondoContador = fondoContadorJ1;
                         break;
-                    case 2 :
+                    case 2:
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    case 3:
                         jugador = 2;
                         tvContador = tvContador2;
                         fondoContador = fondoContadorJ2;
@@ -1072,12 +1308,150 @@ private void crearThread() {
 
                 valorAOperar = calculaValorAOperar(tvContador.getText().toString());
                 int valorContador = Integer.parseInt(tvContador.getText().toString());
-                borro= false;
+                borro = false;
                 if (valorAOperar != 0) {
                     try {
-                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador,fondoContador);
+                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador, fondoContador);
                         if (temp != null) {
-                            temp.put("retirada",true);
+                            temp.put("retirada", true);
+                            agregaMovimiento(temp);
+                            generarLogPrincipal();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+
+//Inicializa los botones de suma
+
+        Button btnSumaL2 = (Button) rootView.findViewById(R.id.suma1L2);
+
+        btnSumaL2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int jugador;
+                TextView tvContador;
+                ImageView fondoContador;
+                borro= false;
+                switch ( ladoNumeros) {
+                    case 1 :
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                    case 2 :
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    case 3:
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    default:
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                }
+
+
+                int valorAOperar = calculaValorAOperar(tvValorAOperar.getText().toString());
+                int valorContador = Integer.parseInt(tvContador.getText().toString());
+                if (valorAOperar != 0) {
+                    JSONObject temp = calculaValor(valorContador, valorAOperar, "+", Integer.toString(jugador), tvContador, fondoContador);
+                    if (temp != null) {
+                        agregaMovimiento(temp);
+                        generarLogPrincipal();
+                    }
+                }
+            }
+        });
+        Button btnRestaL2 = (Button) rootView.findViewById(R.id.resta1L2);
+
+        btnRestaL2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int jugador;
+                TextView tvContador;
+                ImageView fondoContador;
+                switch ( ladoNumeros) {
+                    case 1 :
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                    case 2 :
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    case 3:
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    default:
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                }
+
+                int valorAOperar = calculaValorAOperar(tvValorAOperar.getText().toString());
+                int valorContador = Integer.parseInt(tvContador.getText().toString());
+                borro= false;
+                if (valorAOperar != 0) {
+                    JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador,fondoContador);
+                    if (temp != null) {
+                        agregaMovimiento(temp);
+                        generarLogPrincipal();
+                    }
+                }
+            }
+        });
+
+        btnRetiradaL2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int jugador, valorAOperar;
+                TextView tvContador;
+                ImageView fondoContador;
+                switch (ladoNumeros) {
+                    case 1:
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                    case 2:
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    case 3:
+                        jugador = 2;
+                        tvContador = tvContador2;
+                        fondoContador = fondoContadorJ2;
+                        break;
+                    default:
+                        jugador = 1;
+                        tvContador = tvContador1;
+                        fondoContador = fondoContadorJ1;
+                        break;
+                }
+
+                valorAOperar = calculaValorAOperar(tvContador.getText().toString());
+                int valorContador = Integer.parseInt(tvContador.getText().toString());
+                borro = false;
+                if (valorAOperar != 0) {
+                    try {
+                        JSONObject temp = calculaValor(valorContador, valorAOperar, "-", Integer.toString(jugador), tvContador, fondoContador);
+                        if (temp != null) {
+                            temp.put("retirada", true);
                             agregaMovimiento(temp);
                             generarLogPrincipal();
                         }
@@ -1153,7 +1527,31 @@ private void crearThread() {
 
             }
         });
-        btnEmpate.setOnClickListener(new View.OnClickListener() {
+        btnEmpateL1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JSONObject movimiento = new JSONObject();
+                try {
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa");
+                    Date dt = new Date();
+                    String strValue = timeFormat.format(dt);
+                    movimiento.put("valor_original", 0);
+                    movimiento.put("valor_operado", 0);
+                    movimiento.put("valor_nuevo", 0);
+                    movimiento.put("hora", strValue);
+                    movimiento.put("operador", "d");
+                    movimiento.put("jugador", "0");
+                    movimiento.put("empate", true);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ganadorJuego = "d";
+                agregaMovimiento(movimiento);
+                generarLogPrincipal();
+            }
+        });
+
+        btnEmpateL2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 JSONObject movimiento = new JSONObject();
@@ -1247,6 +1645,21 @@ private void crearThread() {
                 }
             });
         }
+        ViewTarget target = new ViewTarget(rootView.findViewById(R.id.contador1));
+
+        boolean primeraVez = misPreferencias.getBoolean(PREF_PRIMERA_VEZ,true);
+        if (primeraVez) {
+            new ShowcaseView.Builder(getActivity())
+                    .setTarget(target)
+                    .setContentTitle(getActivity().getString(R.string.titulo_ayuda_contenedor_numeros))
+                    .setContentText(getActivity().getString(R.string.descripcion_ayuda_contenedor_numeros))
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .hideOnTouchOutside()
+                    .build();
+            SharedPreferences.Editor edit = misPreferencias.edit();
+            edit.putBoolean(PREF_PRIMERA_VEZ,false);
+            edit.commit();
+        }
 
         return rootView;
     }
@@ -1254,6 +1667,10 @@ private void crearThread() {
     private void alertaModificarNombre(int gJugador) {
         final int jugador = gJugador;
         final EditText nombre =  new EditText(getActivity());
+        int maxLength = 20;
+        InputFilter[] fArray = new InputFilter[1];
+        fArray[0] = new InputFilter.LengthFilter(maxLength);
+        nombre.setFilters(fArray);
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -1268,12 +1685,14 @@ private void crearThread() {
                                     nombrej1 = nuevoNombre;
                                     edit.putString(PREF_NOMBREJ1, nuevoNombre);
                                     edit.commit();
+                                    mostrarDialogCambioNombreJ1 = false;
                                     break;
                                 case 2 :
                                     tvNombreJ2.setText(nuevoNombre);
                                     nombrej2 = nuevoNombre;
                                     edit.putString(PREF_NOMBREJ2, nuevoNombre);
                                     edit.commit();
+                                    mostrarDialogCambioNombreJ2 = false;
                                     break;
                                 default:
                                     break;
@@ -1283,6 +1702,8 @@ private void crearThread() {
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
+                        mostrarDialogCambioNombreJ1 = false;
+                        mostrarDialogCambioNombreJ2 = false;
                         break;
                 }
             }
@@ -1299,18 +1720,35 @@ private void crearThread() {
                 tituloDialogoCambioNombre = getString(R.string.dialogo_titulo_cambio_nombre);
                 break;
         }
+        if (ladoNumeros != 0) {
+            mostrarContenedorNumeros(ladoNumeros);
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         nombre.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         nombre.setHint(getActivity().getString(R.string.texto_hint_nombre));
-        nombre.setPadding(40,20,20,20);
+        nombre.setPadding(40, 20, 20, 20);
         builder.setTitle(tituloDialogoCambioNombre)
                 .setView(nombre)
                 .setPositiveButton(R.string.boton_aceptar, dialogClickListener)
                 .setNegativeButton(R.string.boton_cancelar, dialogClickListener)
-                .show();
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        mostrarDialogCambioNombreJ1 = false;
+                        mostrarDialogCambioNombreJ2 = false;
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        dialog.show();
     }
 
-    private void mostrarContenedorNumeros( int lado) {
+    public int getLadoNumeros() {
+        return ladoNumeros;
+    }
+
+    public void mostrarContenedorNumeros( int lado) {
+        nuevoTexto = 0;
         if (ladoNumeros == 0) {
             ladoNumeros = lado;
             long millis = System.currentTimeMillis();
@@ -1322,12 +1760,38 @@ private void crearThread() {
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
             Log.v("HoraV", "Hora:" + fecha);
             contenedorNumeros.setVisibility(View.VISIBLE);
-            if (lado == 1 ) {
-                tvEspaciadoIzquierdo.setVisibility(View.VISIBLE);
-                tvEspaciadoDerecho.setVisibility(View.GONE);
-            } else if (lado == 2) {
-                tvEspaciadoIzquierdo.setVisibility(View.GONE);
-                tvEspaciadoDerecho.setVisibility(View.VISIBLE);
+            switch (lado) {
+                case 1 :
+//                    ibtnEditNombreJ1.setVisibility(View.VISIBLE);
+                    llLado1.setVisibility(View.VISIBLE);
+                    llLado2.setVisibility(View.GONE);
+                    tvEspacioJ1.setVisibility(View.VISIBLE);
+                    tvEspacioJ2.setVisibility(View.GONE);
+                    break;
+                case 2 :
+//                    ibtnEditNombreJ2.setVisibility(View.VISIBLE);
+                    llLado1.setVisibility(View.VISIBLE);
+                    llLado2.setVisibility(View.GONE);
+                    tvEspacioJ1.setVisibility(View.GONE);
+                    tvEspacioJ2.setVisibility(View.VISIBLE);
+                    break;
+                case 3 :
+//                    ibtnEditNombreJ2.setVisibility(View.VISIBLE);
+                    llLado2.setVisibility(View.VISIBLE);
+                    llLado1.setVisibility(View.GONE);
+                    tvEspacioJ3.setVisibility(View.VISIBLE);
+                    tvEspacioJ4.setVisibility(View.GONE);
+                    break;
+                case 4 :
+//                    ibtnEditNombreJ2.setVisibility(View.VISIBLE);
+                    llLado2.setVisibility(View.VISIBLE);
+                    llLado1.setVisibility(View.GONE);
+                    tvEspacioJ3.setVisibility(View.GONE);
+                    tvEspacioJ4.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    break;
+
             }
             if (interrumpo) {
                 interrumpo = false;
@@ -1335,17 +1799,6 @@ private void crearThread() {
             }
             crearThread();
             threadContenedorNumeros.start();
-        } else if (ladoNumeros != lado) {
-            ladoNumeros = lado;
-            if (lado == 1 ) {
-                tvEspaciadoIzquierdo.setVisibility(View.VISIBLE);
-                tvEspaciadoDerecho.setVisibility(View.GONE);
-            } else if (lado == 2) {
-                tvEspaciadoIzquierdo.setVisibility(View.GONE);
-                tvEspaciadoDerecho.setVisibility(View.VISIBLE);
-            }
-            interrumpo = true;
-            segundosContenedor = 0;
         } else {
             ladoNumeros = 0;
             contenedorNumeros.setVisibility(View.GONE);
@@ -1393,6 +1846,8 @@ private void crearThread() {
         outState.putInt("sLadoNumeros", ladoNumeros);
         outState.putBoolean("sSimulando", simulando);
         outState.putBoolean("sMostrarDialogGanador", mostrarDialogGanador);
+        outState.putBoolean("sMostrarDialogCambioNombreJ1", mostrarDialogCambioNombreJ1);
+        outState.putBoolean("sMostrarDialogCambioNombreJ2", mostrarDialogCambioNombreJ2);
         outState.putBoolean("sMostrarDialogReinicio", mostrarDialogReinicio);
         outState.putString("sGanadorJuego", ganadorJuego);
         outState.putString("sGanadorDuelo", ganadorDuelo);
@@ -1408,6 +1863,16 @@ private void crearThread() {
         Log.v("segundosAVT", "" + segundos);
         valorTempo = ( int) segundos;
         Log.v("valorTempoAVT", "" + valorTempo);
+    }
+
+    @Override
+    public void onStart() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if (valorInicial != Integer.parseInt(prefs.getString(getString(R.string.pref_key_valor_inicial), getString(R.string.pref_default_valor_inicial)))
+                || tempoInicial != Integer.parseInt(prefs.getString(getString(R.string.pref_key_tiempo_contador),getString(R.string.pref_default_tiempo_contador)))*60) {
+            reiniciarPartida();
+        }
+        super.onStart();
     }
 
     @Override
@@ -1432,6 +1897,7 @@ private void crearThread() {
         }
         super.onStop();
     }
+
 
     @Override
     public void onDestroy() {
@@ -1657,12 +2123,43 @@ private void crearThread() {
                     }
                 }
             }
+            if (c1 == 0) {
+                strLogJ1 = ".<br/>.<br/>.";
+            }
+            if (c2 == 0) {
+                strLogJ2 = ".<br/>.<br/>.";
+            }
+            tvLogJ2.setText(strLogVacio);
             tvLogJ1.setText(Html.fromHtml(strLogJ1, null, myHtmlHandler));
             tvLogJ2.setText(Html.fromHtml(strLogJ2, null, myHtmlHandler));
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
+    public boolean ultimoMovimientoEmpate() {
+        int posicion;
+        try {
+            JSONArray datosTemp = datosPartida;
+            JSONObject obTemp;
+            if ( posicionArrayActual != datosTemp.length() - 1) {
+                posicion = posicionArrayActual - 1;
+            } else {
+                posicion = datosTemp.length() - 1;
+            }
+            obTemp = (JSONObject) datosTemp.get(posicion);
+            if (obTemp.has("empate")) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (JSONException e ) {
+            e.printStackTrace();
+        }
+        return  true;
+
+    };
+
     public void actionReiniciar() {
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -1674,6 +2171,7 @@ private void crearThread() {
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         mostrarDialogReinicio = false;
+
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         if (numeroJuego >1 ){
@@ -1686,21 +2184,39 @@ private void crearThread() {
         };
         if (numeroJuego <= 1) {
                 if (mostrarDialogReinicio) {
+                    if (ladoNumeros != 0) {
+                        mostrarContenedorNumeros(ladoNumeros);
+                    }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getString(R.string.dialogo_texto_reincio_duelo))
                             .setTitle(getString(R.string.dialogo_titulo_reincio))
                             .setPositiveButton(R.string.boton_positivo_fin_juego, dialogClickListener)
                             .setNegativeButton(R.string.boton_negativo_fin_juego, dialogClickListener)
+                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    mostrarDialogReinicio = false;
+                                }
+                            })
                             .show();
                 }
             } else {
                 if (mostrarDialogReinicio) {
+                    if (ladoNumeros != 0) {
+                        mostrarContenedorNumeros(ladoNumeros);
+                    }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(getString(R.string.dialogo_texto_reincio))
                             .setTitle(getString(R.string.dialogo_titulo_reincio))
                             .setPositiveButton(R.string.boton_positivo_reinicio, dialogClickListener)
                             .setNeutralButton(R.string.boton_neutral_reinicio, dialogClickListener)
                             .setNegativeButton(R.string.boton_negativo_reinicio, dialogClickListener)
+                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    mostrarDialogReinicio = false;
+                                }
+                            })
                             .show();
                 }
             }

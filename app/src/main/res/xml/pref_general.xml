@@ -7,6 +7,7 @@
         android:selectAllOnFocus="true"
         android:inputType="number"
         android:singleLine="true"
+        android:maxLength="5"
         android:maxLines="1" />
 
     <EditTextPreference
@@ -16,6 +17,7 @@
         android:selectAllOnFocus="true"
         android:inputType="number"
         android:singleLine="true"
+        android:maxLength="2"
         android:maxLines="1" />
 
 </PreferenceScreen>

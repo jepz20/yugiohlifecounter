@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="hn.jepz.www.yugiohlifecounter" >
-
-    <uses-permission android:name="android.permission.VIBRATE" />
+    package="hn.jepz.www.yugiohlifecounter"
+    android:versionCode="3"
+    android:versionName="0.2">
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/i_ylc"
+        android:icon="@mipmap/ic_ylc"
         android:theme="@style/AppTheme"
         android:label="@string/app_name" >
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:windowSoftInputMode="adjustPan"
             android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,12 +28,12 @@
         <activity
             android:name=".MonedaActivity"
             android:label="@string/title_activity_moneda"
-            android:theme="@style/Theme.AppCompat.Dialog" >
+            android:theme="@style/AppDialog" >
         </activity>
         <activity
             android:name=".DadoActivity"
             android:label="@string/title_activity_dado"
-            android:theme="@style/Theme.AppCompat.Dialog" >
+            android:theme="@style/AppDialog" >
         </activity>
         <activity
             android:name=".LogActivity"

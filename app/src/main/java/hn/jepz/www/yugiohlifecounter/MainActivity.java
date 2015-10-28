@@ -47,5 +47,14 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onBackPressed() {
+        PartidaFragment partidaFragment = (PartidaFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        int ladoNumeros = partidaFragment.getLadoNumeros();
+        if ( ladoNumeros != 0) {
+            partidaFragment.mostrarContenedorNumeros(ladoNumeros);
+        } else {
+            super.onBackPressed();
+        }
+    }
 }

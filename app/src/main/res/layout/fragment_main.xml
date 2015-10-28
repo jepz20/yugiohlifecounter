@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity$PlaceholderFragment"
@@ -79,28 +80,42 @@
                         android:textColor="@color/texto_contador"
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"/>
-                    <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:id="@+id/tvNombreJ1"
-                        android:text="Jose"
-                        android:textSize="400sp"
-                        android:paddingLeft="5dp"
-                        android:textColor="@color/texto_contador"
-                        android:gravity="bottom" />
+                        android:layout_weight="1">
+                        <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="7"
+                            android:id="@+id/tvNombreJ1"
+                            android:text="Jose"
+                            android:textSize="400sp"
+                            android:paddingLeft="5dp"
+                            android:textColor="@color/texto_contador"
+                            android:singleLine="true"
+                            android:gravity="bottom" />
+                        <ImageButton
+                            android:layout_width="30dp"
+                            android:visibility="invisible"
+                            android:layout_height="30dp"
+                            android:layout_gravity="bottom"
+                            android:background="@drawable/ic_edit"/>
+                    </LinearLayout>
                 </LinearLayout>
             </RelativeLayout>
 <ScrollView
+    android:id="@+id/svLogJ1"
     android:layout_width="match_parent"
     android:layout_weight="4"
-    android:layout_height="0dp">
+    android:layout_height="0dp"
+    android:paddingBottom="55dp">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/tvLog1"
-        android:enabled="false"
         android:textSize="40sp"
+        android:textColor="@color/texto_log_principal"
         android:gravity="center_horizontal"
         android:text="4500\n6000\n7500\n8000"
         />
@@ -169,27 +184,41 @@
                         android:textSize="400sp"
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"/>
-                    <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:id="@+id/tvNombreJ2"
-                        android:text="Palma"
-                        android:textSize="400sp"
-                        android:textColor="@color/texto_contador"
-                        android:paddingLeft="5dp"
-                        android:gravity="bottom"/>
+                        android:layout_weight="1">
+                        <hn.jepz.www.yugiohlifecounter.AutoResizeTextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="7"
+                            android:id="@+id/tvNombreJ2"
+                            android:text="Palma"
+                            android:textSize="400sp"
+                            android:paddingLeft="5dp"
+                            android:textColor="@color/texto_contador"
+                            android:singleLine="true"
+                            android:gravity="bottom" />
+                        <ImageButton
+                            android:layout_width="30dp"
+                            android:visibility="invisible"
+                            android:layout_height="30dp"
+                            android:layout_gravity="bottom"
+                            android:background="@drawable/ic_edit"/>
+                    </LinearLayout>
                 </LinearLayout>
             </RelativeLayout>
             <ScrollView
+                android:id="@+id/svLogJ2"
                 android:layout_width="match_parent"
                 android:layout_weight="4"
-                android:layout_height="0dp">
+                android:layout_height="0dp"
+                android:paddingBottom="55dp">
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/tvLog2"
-                    android:enabled="false"
+                    android:textColor="@color/texto_log_principal"
                     android:textSize="40sp"
                     android:gravity="center_horizontal"
                     android:text="4500\n6000\n7500\n8000"
@@ -197,6 +226,7 @@
             </ScrollView>
         </LinearLayout>
     </LinearLayout>
+</LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="55dp"
@@ -271,9 +301,9 @@
                 android:background="@drawable/ic_moneda"/>
         </RelativeLayout>
         <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent">
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -291,25 +321,34 @@
                 android:background="@drawable/ic_log"/>
         </RelativeLayout>
     </LinearLayout>
-</LinearLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:id="@+id/contenedorNumeros"
-        android:visibility="gone"
+        android:visibility="visible"
         android:orientation="vertical"
         android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="7"
+            android:layout_weight="2"
+            android:id="@+id/llLado1"
             android:orientation="horizontal">
-            <TextView
+
+            <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/espaciadoIzquierdo"
-                android:layout_weight="1"/>
+                android:id="@+id/espacioJ1"
+                android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="30dp"
+                    android:id="@+id/ibtnEditNombreJ1"
+                    android:visibility="visible"
+                    android:layout_height="30dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/ic_edit"/>
+            </RelativeLayout>
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -332,7 +371,7 @@
                             android:background="@drawable/boton_calculadora"
                             android:text="@string/texto_boton_retirada"
                             android:textColor="@color/texto_botones_contenedor_numeros"
-                            android:id="@+id/btnRetirada"/>
+                            android:id="@+id/btnRetiradaL1"/>
                         <Button
                             android:layout_width="0dp"
                             android:layout_weight="1"
@@ -340,7 +379,7 @@
                             android:background="@drawable/boton_calculadora"
                             android:text="@string/texto_boton_empate"
                             android:textColor="@color/texto_botones_contenedor_numeros"
-                            android:id="@+id/btnEmpate"/>
+                            android:id="@+id/btnEmpateL1"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -359,7 +398,7 @@
                                 android:textColor="@color/texto_botones_contenedor_numeros"
                                 android:gravity="bottom|center"
                                 android:textSize="30sp"
-                                android:id="@+id/suma1"
+                                android:id="@+id/suma1L1"
                                 android:background="@drawable/boton_calculadora"/>
                             <ImageView
                                 android:layout_width="100dp"
@@ -377,7 +416,7 @@
                             android:text="-"
                             android:textColor="@color/texto_botones_contenedor_numeros"
                             android:textSize="30sp"
-                            android:id="@+id/resta1"
+                            android:id="@+id/resta1L1"
                             android:background="@drawable/boton_calculadora"/>
 
                             <ImageView
@@ -390,17 +429,25 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
+            <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/espaciadoDerecho"
-                android:visibility="gone"/>
+                android:id="@+id/espacioJ2"
+                android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="30dp"
+                    android:id="@+id/ibtnEditNombreJ2"
+                    android:visibility="visible"
+                    android:layout_height="30dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/ic_edit"/>
+            </RelativeLayout>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="16
+            android:layout_weight="4
             "
             android:orientation="horizontal">
             <LinearLayout
@@ -592,6 +639,122 @@
 
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:id="@+id/llLado2"
+            android:visibility="visible"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:id="@+id/espacioJ3"
+                android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="30dp"
+                    android:id="@+id/ibtnEditNombreJ3"
+                    android:visibility="visible"
+                    android:layout_height="30dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/ic_edit"/>
+            </RelativeLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@color/fondo_calculadora"
+                android:layout_weight="1">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+                        <Button
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/boton_calculadora"
+                            android:text="@string/texto_boton_retirada"
+                            android:textColor="@color/texto_botones_contenedor_numeros"
+                            android:id="@+id/btnRetiradaL2"/>
+                        <Button
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/boton_calculadora"
+                            android:text="@string/texto_boton_empate"
+                            android:textColor="@color/texto_botones_contenedor_numeros"
+                            android:id="@+id/btnEmpateL2"/>
+                    </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="2"
+                        android:orientation="horizontal"
+                        android:minHeight="@dimen/abc_action_bar_default_height_material">
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+                            <Button
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textColor="@color/texto_botones_contenedor_numeros"
+                                android:gravity="bottom|center"
+                                android:textSize="30sp"
+                                android:id="@+id/suma1L2"
+                                android:background="@drawable/boton_calculadora"/>
+                            <ImageView
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:src="@drawable/ic_suma"
+                                android:layout_centerInParent="true"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+                            <Button
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="-"
+                                android:textColor="@color/texto_botones_contenedor_numeros"
+                                android:textSize="30sp"
+                                android:id="@+id/resta1L2"
+                                android:background="@drawable/boton_calculadora"/>
+
+                            <ImageView
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:src="@drawable/ic_resta"
+                                android:layout_centerInParent="true"/>
+                        </RelativeLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:id="@+id/espacioJ4"
+                android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="30dp"
+                    android:id="@+id/ibtnEditNombreJ4"
+                    android:visibility="visible"
+                    android:layout_height="30dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/ic_edit"/>
+            </RelativeLayout>
+        </LinearLayout>
     </LinearLayout>
+
 </RelativeLayout>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">YLC</string>
+    <string name="contador1_texto">8000</string>
+    <string name="contador2_texto">8000</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_undo">Deshacer</string>
+    <string name="action_moneda">Moneda</string>
+    <string name="action_dado">Dado</string>
+    <string name="action_reiniciar">Reiniciar</string>
+    <string name="action_log">Historial</string>
+    <string name="action_redo">Rehacer</string>
+    <string name="boton_turno">T</string>
+    <string name="boton_reiniciar">R</string>
+    <string name="boton_simulacion">Simular</string>
+    <string name="boton_fin_simulacion">Fin</string>
+    <string name="boton_aplica_simulacion">Aplicar</string>
+    <string name="boton_dado_texto">Dado</string>
+    <string name="boton_moneda_texto">Moneda</string>
+    <string name="dialogo_titulo_fin_juego">El Ganador es </string>
+    <string name="dialogo_texto_fin_juego">Deseas Iniciar el Duelo No.</string>
+    <string name="boton_positivo_fin_juego">Si</string>
+    <string name="boton_negativo_fin_juego">No</string>
+    <string name="dialogo_texto_fin_partida_p1">EL GANADOR DE LA PARTIDA ES </string>
+    <string name="dialogo_texto_fin_partida_p1_empate">La partida ha terminado en empate</string>
+    <string name="dialogo_texto_fin_partida_p2">!!! \n Deseas Iniciar una nueva Partida?</string>
+    <string name="dialogo_texto_reincio_duelo">Desea reiniciar el duelo?</string>
+    <string name="dialogo_texto_reincio">Que desea reiniciar?</string>
+    <string name="dialogo_titulo_reincio">Reiniciar</string>
+    <string name="boton_positivo_reinicio">Duelo</string>
+    <string name="boton_neutral_reinicio">Nada</string>
+    <string name="boton_negativo_reinicio">Partida</string>
+    <string name="texto_log_retirada">(R)</string>
+    <string name="texto_numero_duelo_log">Duelo</string>
+    <string name="texto_no_hay_ganador_log">Duelo no hay Terminado</string>
+    <string name="texto__ganador_log">Ganador:</string>
+    <string name="texto_nombre_jugador_defecto">Jugador</string>
+    <string name="texto_boton_retirada">Retirada</string>
+    <string name="texto_boton_empate">Empate</string>
+    <string name="texto_mensaje_empate">Empate</string>
+    <string name="texto_hint_nombre">Nombre...</string>
+    <string name="dialogo_titulo_cambio_nombre">Cambiar nombre de</string>
+    <string name="boton_aceptar">Aceptar</string>
+    <string name="boton_cancelar">Cancelar</string>
+
+    <!-- Strings de ayuda-->
+    <string name="titulo_ayuda_contenedor_numeros">Calculadora</string>
+    <string name="descripcion_ayuda_contenedor_numeros">Toca uno de los lados para mostrar la calculadora o cambiar el nombre del jugador</string>
+    <string name="titulo_ayuda_temporizador">Temporizador</string>
+    <string name="descripcion_ayuda_temporizador">Toca el temporizador para pausar y mantenlo presionado para reiniciar</string>
+    <string name="boton_ayuda">Entendido!</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="title_activity_moneda">Lanzar Moneda</string>
+    <string name="title_activity_dado">Lanzar Dado</string>
+    <string name="title_activity_log">Historial</string>
+</resources>
